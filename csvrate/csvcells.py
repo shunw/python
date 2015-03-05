@@ -60,20 +60,27 @@ class startRowCol:
 		rowIndex = 0
 		for row in self.csvData:
 			#print str(row)
-			if rowIndex > 0:
+			if rowIndex > 0: #bypass the first row
+				colIndex = 0
+				# for col in row:
+				# 	if self.startCol == -1 and not is_empty(col):
+				# 		#print str(rowIndex) +', '+ str(colIndex) + ': ' + str(row)
+				# 		self.startCol = colIndex
+				# 		break
+				# 	colIndex += 1
+				if self.startCol == -1: continue
+				if not is_empty(row[self.startCol-1]):
+					self.startRow = rowIndex
+					break
+			else:
 				colIndex = 0
 				for col in row:
-					if self.startCol == -1 and not is_empty(col):
-						#print str(rowIndex) +', '+ str(colIndex) + ': ' + str(row)
+					if colIndex > 0 and not is_empty(col):
 						self.startCol = colIndex
 						break
 					colIndex += 1
-				if self.startCol == -1: continue
-				if is_empty(row[0]) and not is_empty(row[self.startCol-1]):
-					self.startRow = rowIndex
-					break
 			rowIndex += 1
-		self.startRow -= 1
+		#self.startRow -= 1
 
 
 
