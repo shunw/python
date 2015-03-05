@@ -12,7 +12,7 @@ if __name__ == '__main__':
 	outputCsvFile = 'test.csv'
 	if (len(args) > 2):
 		outputCsvFile = args[2]
-	#csvcells.testStartRowCol('test.csv')
+	csvcells.testStartRowCol(problemCsvFile)
 	print 'problem file: ' + problemCsvFile
 	print 'job file: ' + jobCsvFile
 	print 'output file: ' + outputCsvFile
