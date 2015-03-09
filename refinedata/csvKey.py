@@ -70,6 +70,7 @@ def getData(datafile, fd_dict):
 				datastream[obj] = {}
 				for cal in fd_dict[sumup]:
 					datastream[obj][cal]=int(line[cal])
+				#print datastream[obj]
 			else:
 				for cal in fd_dict[sumup]:
 					datastream[obj][cal]+=int(line[cal])
@@ -96,15 +97,16 @@ def csvDataWrite(outputfile, aData):
 		numCols.append(n)
 	csvWriter.writerow(numCols)
 	for fd in datastream:
+		keys = fd.keys[:]
 		for n in aData.numCols:
-			fd.keys.append(datastream[fd][n])
-		csvWriter.writerow(fd.keys)	
+			keys.append(datastream[fd][n])		
+		csvWriter.writerow(keys)	
 		#csvWriter(datastream[fd])
 		
 
 
 if __name__ == '__main__': 
-	task=fd_task("keys.csv", 'jobs','jobs-key' )
-	aData=getData("jobs-test.csv", task)
+	task=fd_task("keys.csv", 'pro','pro-key' )
+	aData=getData("pro.csv", task)
 	# for obj in datastream: print str(obj) +'\t%%%\t' + str(datastream[obj])
 	csvDataWrite("test.csv", aData)
