@@ -68,8 +68,8 @@ class startRowCol:
 				# 		self.startCol = colIndex
 				# 		break
 				# 	colIndex += 1
-				if self.startCol == -1: continue
-				if not is_empty(row[self.startCol-1]):
+				# if self.startCol == -1: continue
+				if not is_empty(row[self.startCol-1]): # find the row title index
 					self.startRow = rowIndex
 					break
 			else:
@@ -80,7 +80,7 @@ class startRowCol:
 						break
 					colIndex += 1
 			rowIndex += 1
-		#self.startRow -= 1
+		self.startRow += 1 # titleRowIndex+1
 
 
 
@@ -122,7 +122,7 @@ def writeListData(csvFile, listData):
 	csvWriter = csv.writer(fileStream)
 	csvWriter.writerows(listData)
 
-def getData(csvFile):
+def getData(csvFile, includeEmpty):
 	''' get a cellObject list for a csv file '''
 	startInfo = startRowCol(csvFile)
 	startInfo.getIndex()
@@ -133,13 +133,29 @@ def getData(csvFile):
 	rowIndex = 0
 	for row in csvData:
 		csvList.append(row)
+		if rowIndex < startInfo.startRow: 
+			rowIndex+=1 
+			continue
 		colIndex = 0
 		for col in row:
-			if is_number(col):
+			if colIndex < startInfo.startCol:
+				colIndex += 1
+				continue
+			if includeEmpty or is_number(col):
 				rowKeys0 = getRowKeys(csvList, startInfo.startRow, rowIndex, startInfo.startCol)
 				colKeys0 = getColKeys(csvList, startInfo.startRow, startInfo.startCol, colIndex)
 				keys = cellKeys(rowKeys0, colKeys0)
-				cell0 = cellObject(rowIndex, colIndex, float(col))
+				if includeEmpty:
+					print 'keys:' + str(rowIndex)+ str(colIndex)
+				fv = 0
+				if not is_empty(col):
+					try:
+					 	fv = float(col)
+					except Exception,e:
+					 	print 'err pos: ' + str(rowIndex) +', ' + str(colIndex)
+					 	raise e
+					
+				cell0 = cellObject(rowIndex, colIndex, fv)
 				cell0.setCellKeys(keys)
 				cellDict[keys]=cell0
 			colIndex += 1
