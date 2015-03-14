@@ -17,15 +17,22 @@ if __name__ == '__main__':
 	print 'job file: ' + jobCsvFile
 	print 'output file: ' + outputCsvFile
 	raw_input('press enter to continue...')
-	problemData = csvcells.getData(problemCsvFile)
-	jobData = csvcells.getData(jobCsvFile)
+	problemData = csvcells.getData(problemCsvFile, True)
+	jobData = csvcells.getData(jobCsvFile, False)
 	listData = csvcells.getListData(problemCsvFile)
+
 	changedData = []
 	for pkey in problemData:
 		if not pkey in jobData: continue
 		pValue = problemData[pkey]
 		jValue = jobData[pkey]
-		cValue = (pValue.rowIndex, pValue.colIndex, round(jValue.value/pValue.value, 2))
+		if pValue.value == 0 and jValue.value != 0:
+			print 'NA Key: ' + str(pkey)
+			pjv = 'NA/'+str(jValue.value)
+		else:
+			pjv = round(jValue.value/pValue.value, 2)
+
+		cValue = (pValue.rowIndex, pValue.colIndex, pjv)
 		changedData.append(cValue)
 	rowIndex = 0
 	for c in changedData:
