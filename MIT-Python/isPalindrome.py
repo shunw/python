@@ -6,9 +6,10 @@ def isPalindrome(word):
 	return True
 
 def isPalindrome_1(s):
-	if len(s)<=1: True
+	if len(s)<=1: return True
 	else:
-		return s[0]==s[-1] or isPalindrome_1(s[1:-1])
+		return s[0]==s[-1] and isPalindrome_1(s[1:-1])
+		
 
 
 
