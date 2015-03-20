@@ -10,5 +10,6 @@ Univs=[]
 # 		print c
 Univs=Techs+Ivys
 Ivys.remove('Harvard')
+Ivys[1]=-15
 print Univs
 print Ivys
