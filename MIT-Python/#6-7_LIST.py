@@ -8,7 +8,8 @@ Univs=[]
 # 	print e
 # 	for c in e:
 # 		print c
-Univs=Techs+Ivys
+Univs=Ivys
+print Univs
 Ivys.remove('Harvard')
 Ivys[1]=-15
 print Univs
