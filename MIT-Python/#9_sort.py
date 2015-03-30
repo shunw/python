@@ -20,8 +20,29 @@ def sort_base(s):
 		count+=1
 	print s
 
+def bubbleSort(L):
+	for j in range(len(L)):
+		for i in range (len(L)-j-1):
+			if L[i]>L[i+1]:
+				temp=L[i]
+				L[i]=L[i+1]
+				L[i+1]=temp
+		print L
+
+def bubbleSort1(L):
+	swapped=True
+	while swapped:
+		swapped=False
+		for i in range(len(L)-1):
+			if L[i]>L[i+1]:
+				temp=L[i]
+				L[i]=L[i+1]
+				L[i+1]=temp
+				swapped=True
+		print L
+
 def sort_test():
 	s=[5, 4, 6, 2, 1]
-	print s, sort_base(s)
+	print bubbleSort1(s)
 
 sort_test()
