@@ -61,7 +61,7 @@ def mergesort(L):
 		return together
 
 def mergesort_test():
-	L=[12, 32, 2, 16, 0, 89, 32, -121, 172, 211, 2, 5, 8, 7, 5, 90, 1]
+	L=[12]
 	mergesort(L)
 
 def merge_test():
@@ -69,4 +69,38 @@ def merge_test():
 	right=[2, 9, 11, 14]
 	print merge(left, right)
 
-merge_test()
+#next are for the hashing ...
+def create(smallest, largest):
+	#SAMPLE
+	intSet=[]
+	for i in range(smallest, largest+1): intSet.append(None)
+	return intSet
+
+def insert(intSet, e):
+	#SAMPLE
+	intSet[e]=1
+
+def member(intSet, e):
+	#SAMPLE
+	return intSet[e]==1
+
+def hashChar(c):
+	#SAMPLE
+	# c is a char
+	#function returns a different integar in the range 0-255
+	#for each possible vlue of c
+	return ord(c)
+
+def cSetCreate():
+	cSet=[]
+	for i in range (0, 255): cSet.append(None)
+	return cSet
+
+def cSetInsert(cSet, e):
+	cSet[hashChar(e)]=1
+
+def cSetMember(cSet, e):
+	return cSet[hashChar(e)]==1
+
+print ord("4")
+
