@@ -6,4 +6,4 @@ def tower(size, froms, to, spare):
 		tower(1, froms, to, spare)
 		tower(size-1, spare, to, froms)
 
-tower(5, "f", "t", "s")
+tower(5	, "f", "t", "s")
