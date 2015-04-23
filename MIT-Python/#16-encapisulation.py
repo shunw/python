@@ -55,5 +55,4 @@ class UG(MITPerson):
 
 me = Person("Grimson", "Eric")
 ug = UG('Doe', 'Jane')
-print me
-print ug
+print per<ug #this can work. but ug<per cannot workL: ug.__cmp__(per)
