@@ -1,21 +1,19 @@
 import csv
-import itertools
 
-a = open('a.csv', 'r')
-b = open('b.csv', 'wb')
-ra = csv.DictReader(a)
-wb = csv.DictWriter(b, None)
+inp = open('a.csv', 'r')
+out = open('b.csv', 'wb')
+r_inp = csv.DictReader(a)
+w_out = csv.DictWriter(b)
 
-for d in ra:
+# for d in ra:
+# 	#print d
+# 	if wb.fieldnames is None:
+# 	# initialize and write b's headers
+# 		dh = dict((h, h) for h in ra.fieldnames)
+# 		wb.fieldnames = ra.fieldnames
+# 		wb.writerow(dh)
 
-  if wb.fieldnames is None:
-    # initialize and write b's headers
-    dh = dict((h, h) for h in ra.fieldnames)
-    print ra.fieldnames
-    wb.fieldnames = ra.fieldnames
-    wb.writerow(dh)
-
-  wb.writerow(d)
-
-b.close()
-a.close()
+# 	wb.writerow(d)
+sort_key=["f1", "f2"]
+sort_col_1=
+sort_col_2=
