@@ -1,4 +1,7 @@
 import re
+import csv
+import sys
+import os
 
 def get_data(fl, raw):
 #this is to make the data out of the function
@@ -16,6 +19,7 @@ def get_data(fl, raw):
 
 def list_name(dic):
 #this is to create a full list name with len(dict)
+#++++++++++++ NOT VERY USEFUL HERE ++++++++++++
 	list_n=list()
 	b_name="file"
 	n=len(dic)
@@ -25,45 +29,71 @@ def list_name(dic):
 	return list_n
 
 def dic2list(dic):
-#this is to count how many keys in the dic
-	lt=list_name(dic) #--->>> this is a list for list names
-	n=0
-	for i in lt:
-		lt[n]=list()
-		lt[n].append(dic.keys()[n])
-		lt[n].append
-		n+=1
+#this is to make the dict into lists
+	lt=list() 
+	for key, value in dic.iteritems():
+		temp=list()
+		temp.append(key)
+		for i in value:
+			temp.append(i)
+		lt.append(temp)
+		# print lt
+		# debug_1()
 
-	
+	return lt
 
-#module --- get all the files in the folder
-#judge if this is the SAD file --- according to some key words
-#make the dict file
-# --->>> write the dict file to CSV format
-#done
-import os
+def listT(dataflow):
+#this is to exchange the col and row data
+	x=zip(*dataflow)
+	return x
+
+
+
+def writeListData(csvFile, listData):
+	fileStream = open(csvFile, 'wb')
+	csvWriter = csv.writer(fileStream)
+	csvWriter.writerows(listData)
+
+
+def debug_1():
+	#debug code begin
+	judge=raw_input("press 1 here: ")
+	if judge=="1":
+		print " "
+	else:
+		print "break"
+		sys.exit()
+	#debug code end
+
+
+#READ ME
+#PURPOSE: get all TXT files in the folder and make the csv data
+
+
+#STEP 1: make the empty dict file first
 from collections import defaultdict
 raw=defaultdict(list)
 
-# get all the dat file in the current folder
+#STEP 2: get all the TXT file names in the current folder
 fl_name=list()
 files=[f for f in os.listdir('.') if os.path.isfile(f)]
 for f in files:
-	if f[-3:] == 'dat':
+	if f[-3:] == 'txt':
 		fl_name.append(f)
 
-#make the dict file for all the dat data
+#STEP 3: collect the data from files one by one 
+#========and make the dict file for all the dat data
 for n in fl_name:
 	get_data(n, raw)
 
-#turn dict file to CSV format
-#---create list for all the dic item
-n=len(raw)
-dic2list(raw)
-import csv
+#STEP 4: make the dict to list
+#========exchange the col and row
+data_0=sorted(dic2list(raw))
+dataflow=listT(data_0)
+
+#STEP 5: write into the csv files
+writeListData("test.csv", dataflow)
+
+#========================END========================
 
 
-# with open('test.csv', 'wb') as f:  # Just use 'w' mode in 3.x
-#     w = csv.DictWriter(f, raw.keys())
-#     #w.writeheader()
-#     w.writerow(raw)
