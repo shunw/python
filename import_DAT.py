@@ -38,13 +38,15 @@ def get_data_1(fl, raw, fd_list):
 		try:
 			raw[dat_].append(data)
 		except:
-			raw[dat_]=data
+			raw[dat_]=[]
+			raw[dat_].append(data)
 		temp.append(dat_)
 
 	#this is to compare the temp list and the base one
 	if sorted(temp)!=sorted(fd_list):
-		diff=list(set(temp) -set(fd_list))
-		print diff, len(diff)
+		diff=list(set(fd_list) -set(temp))
+		#print temp, len(temp)
+		#print diff, len(diff)
 		for dat_ in diff:
 			raw[dat_].append("NA")
 
@@ -213,8 +215,10 @@ for n in fl_name:
 
 #STEP 4: make the dict to list
 #========exchange the col and row
+print raw
 data_0=sorted(dic2list(raw))
 dataflow=listT(data_0)
+print dataflow
 
 #STEP 5: write into the csv files
 output_name=extention+m_id+".csv"
@@ -228,8 +232,8 @@ if not os.path.exists(fd_name):
     os.mkdir(fd_name)
 	
 #====>>> move all the files to the backupone
-scr="C:\Users\lishunw\My Work\program\Python\data_imp"
-dest=scr+"\\"+fd_name
+scr= "/Users/zhang" #"C:\Users\lishunw\My Work\program\Python\data_imp"
+dest=scr+os.sep+fd_name
 
 movetree(scr, dest, fl_name)
 #========================END========================
