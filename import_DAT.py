@@ -189,15 +189,13 @@ files=[f for f in os.listdir('.') if os.path.isfile(f)]
 extention=raw_input("please enter files extention: ")
 
 #=================if not, judge if the file is same as the first one
-
+counter=1 #===>>> this is for the judgement. If this is the first file, get the measurement ID/ 
 for f in files:
-	counter=1 #===>>> this is for the judgement. If this is the first file, get the measurement ID/ 
 	if f[-3:] == extention:
-		#print counter
 		if counter==1:
 			m_id=get_M_ID(f)
 			fl_name.append(f)
-			print m_id
+			# print "fl_name: " fl_name
 		elif get_M_ID(f) != m_id: 
 			continue
 		else:
@@ -215,24 +213,24 @@ for n in fl_name:
 
 #STEP 4: make the dict to list
 #========exchange the col and row
-print raw
+#print raw
 data_0=sorted(dic2list(raw))
 dataflow=listT(data_0)
-print dataflow
+#print dataflow
 
 #STEP 5: write into the csv files
-output_name=extention+m_id+".csv"
+fd_name=folder_name(m_id, extention)
+output_name=fd_name+".csv"
 writeListData(output_name, dataflow)
 
 #STEP 6: move all the files to the backupfolder. 
 #====>>> create a new folder/ w date/ w test page ID/ w txt or dat
-fd_name=folder_name(m_id, extention)
 
 if not os.path.exists(fd_name):
     os.mkdir(fd_name)
 	
 #====>>> move all the files to the backupone
-scr= "/Users/zhang" #"C:\Users\lishunw\My Work\program\Python\data_imp"
+scr= os.path.dirname(os.path.realpath(__file__)) #"C:\Users\lishunw\My Work\program\Python\data_imp"
 dest=scr+os.sep+fd_name
 
 movetree(scr, dest, fl_name)
