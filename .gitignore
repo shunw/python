@@ -2,3 +2,5 @@
 *.pyo
 *.csv
 .DS_Store
+*.dat
+*.txt
