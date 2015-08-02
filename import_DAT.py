@@ -81,6 +81,7 @@ def get_M_ID(filename, fieldName='TestPageID'):
 		if re.search(".*"+fieldName+"=.*", item):
 			m_number=re.findall('=.*', item)[0][1:]
 	#print m_number
+	print 'Key: ' + fieldName + '; Value: ' + m_number
 	return m_number
 	
 		
@@ -183,67 +184,72 @@ def movetree(src_dir, dst_dir, names):
         shutil.move(src_file, dst_dir)
 
 
+def operate(m_id, fl_name):
+	''' m_id is the id field value, fl_name is file list which has the field id '''
+	#STEP 1: make the empty dict file first
+	raw=defaultdict(list)
+
+	#STEP 2: get all the TXT file names in the current folder
+	#======= one function add/ 20150730======== judge what PQ measurement it is
+	#fl_name=list() # full list of files contains the same id
+
+
+	#STEP 3: collect the data from files one by one 
+	#========and make the dict file for all the dat data
+	#========IF THIS IS DAT FILE, NEED TO COLLECT THE FIELD FIRST
+	fd_list=collect_field(fl_name)
+	print fd_list, len(fd_list)
+	for n in fl_name:
+		get_data_1(n, raw, fd_list)
+
+
+	#STEP 4: make the dict to list
+	#========exchange the col and row
+	#print raw
+	data_0=sorted(dic2list(raw))
+	dataflow=listT(data_0)
+	#print dataflow
+
+	#STEP 5: write into the csv files
+	fd_name=folder_name(m_id, extention)
+	output_name=fd_name+".csv"
+	writeListData(output_name, dataflow)
+
+	#STEP 6: move all the files to the backupfolder. 
+	#====>>> create a new folder/ w date/ w test page ID/ w txt or dat
+
+	if not os.path.exists(fd_name):
+	    os.mkdir(fd_name)
+		
+	#====>>> move all the files to the backupone
+	scr= os.path.dirname(os.path.realpath(__file__)) #"C:\Users\lishunw\My Work\program\Python\data_imp"
+	dest=scr+os.sep+fd_name
+
+	movetree(scr, dest, fl_name)
+	#========================END========================
+
 #READ ME
 #PURPOSE: get all TXT files in the folder and make the csv data
 
 
-#STEP 1: make the empty dict file first
-from collections import defaultdict
-raw=defaultdict(list)
 
-#STEP 2: get all the TXT file names in the current folder
-#======= one function add/ 20150730======== judge what PQ measurement it is
-fl_name=list() # full list of column names
+from collections import defaultdict
+
 #files=[f for f in os.listdir('.') if os.path.isfile(f)] # get all files in current folder
 extention=raw_input("please enter files extention: ")
 files = glob.glob('.'+os.sep+'*.'+extention)
 print 'got files with extention: '+extention + ' ' + str(files)
 
 #=================if not, judge if the file is same as the first one
-counter=1 #===>>> this is for the judgement. If this is the first file, get the measurement ID/
+#idGot = False #===>>> this is for the judgement. If this is the first file, get the measurement ID/
+idFileListDict = {} # [id1:[fileList1], id2:[fileList2], ...]
 for f in files:
-	if counter==1:
-		m_id=get_M_ID(f)
-		fl_name.append(f)
-		# print "fl_name: " fl_name
-	elif get_M_ID(f) != m_id: 
-		continue
+	fieldId = get_M_ID(f)
+	if fieldId not in idFileListDict:
+		idFileListDict[fieldId] = [f]
 	else:
-		fl_name.append(f)
-	counter+=1
+		idFileListDict[fieldId].append(f)
 
-#STEP 3: collect the data from files one by one 
-#========and make the dict file for all the dat data
-#========IF THIS IS DAT FILE, NEED TO COLLECT THE FIELD FIRST
-fd_list=collect_field(fl_name)
-print fd_list, len(fd_list)
-for n in fl_name:
-	get_data_1(n, raw, fd_list)
-
-
-#STEP 4: make the dict to list
-#========exchange the col and row
-#print raw
-data_0=sorted(dic2list(raw))
-dataflow=listT(data_0)
-#print dataflow
-
-#STEP 5: write into the csv files
-fd_name=folder_name(m_id, extention)
-output_name=fd_name+".csv"
-writeListData(output_name, dataflow)
-
-#STEP 6: move all the files to the backupfolder. 
-#====>>> create a new folder/ w date/ w test page ID/ w txt or dat
-
-if not os.path.exists(fd_name):
-    os.mkdir(fd_name)
-	
-#====>>> move all the files to the backupone
-scr= os.path.dirname(os.path.realpath(__file__)) #"C:\Users\lishunw\My Work\program\Python\data_imp"
-dest=scr+os.sep+fd_name
-
-movetree(scr, dest, fl_name)
-#========================END========================
-
+for (k, v) in idFileListDict.items():
+	operate(k, v)
 
