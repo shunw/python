@@ -29,12 +29,15 @@ def get_data_1(fl, raw, fd_list):
 	print fl
 	for line in open(fl, 'r'):
 		item=line.rstrip()
-		dat_=re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
+		eqIndex = item.rfind('=')
+		if eqIndex == -1: # cannot find the equal sign in the item
+			continue
+		dat_= item[0:eqIndex] #re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
 		
-		if re.findall('=.*', item)[0][1:]=="":
+		if eqIndex == len(item)-1: #re.findall('=.*', item)[0][1:]=="":
 			data="NA"
 		else:
-			data=re.findall('=.*', item)[0][1:]
+			data= item[eqIndex+1:] #re.findall('=.*', item)[0][1:]
 		#the following 4 lines is for the 1st entry of the dict
 		try:
 			raw[dat_].append(data)
@@ -57,8 +60,11 @@ def collect_field(fl_names):
 	fd_list=list()
 	for f in fl_names:
 		for line in open(f, 'r'):
-			item=line.rstrip()
-			fd=re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
+			item=line.strip()
+			eqIndex = item.rfind('=')
+			if eqIndex == -1: # cannot find the equal sign in the item
+				continue
+			fd= item[0:eqIndex] #re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
 
 			if fd in fd_list:
 				continue
@@ -67,12 +73,12 @@ def collect_field(fl_names):
 	#print fd_list, len(fd_list)
 	return fd_list
 	
-def get_M_ID(filename):
+def get_M_ID(filename, fieldName='TestPageID'):
 	''' this is to judge the what measurement the file contain. '''
 	for lines in open(filename, 'r'): 
 		item=lines.rstrip()
 		
-		if re.search(".*TestPageID=.*", item):
+		if re.search(".*"+fieldName+"=.*", item):
 			m_number=re.findall('=.*', item)[0][1:]
 	#print m_number
 	return m_number
