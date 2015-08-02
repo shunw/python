@@ -4,9 +4,10 @@ import sys
 import os
 import datetime as dt
 import shutil
+import glob
 
 def get_data(fl, raw):
-#this is to make the data out of the function
+	''' this is to make the data out of the function '''
 	for line in open(fl, 'r'):
 		item=line.rstrip()
 		fd=re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
@@ -22,7 +23,7 @@ def get_data(fl, raw):
 			raw[fd]=data
 
 def get_data_1(fl, raw, fd_list):
-#this is to make the data out of the function
+	''' this is to make the data out of the function '''
 	temp=list() #===>>> this is the name list in the dat/ txt file
 	#this is to get all the field name in the dat file
 	print fl
@@ -52,7 +53,7 @@ def get_data_1(fl, raw, fd_list):
 
 
 def collect_field(fl_names):
-#this is to collect all the field name in all the files: 
+	''' this is to collect all the field name in all the files: '''
 	fd_list=list()
 	for f in fl_names:
 		for line in open(f, 'r'):
@@ -67,7 +68,7 @@ def collect_field(fl_names):
 	return fd_list
 	
 def get_M_ID(filename):
-#this is to judge the what measurement the file contain. 
+	''' this is to judge the what measurement the file contain. '''
 	for lines in open(filename, 'r'): 
 		item=lines.rstrip()
 		
@@ -78,6 +79,8 @@ def get_M_ID(filename):
 	
 		
 def folder_name(ID, extention):
+	''' Folder name with current date string.
+	output format is currentDate-extension-ID'''
 	today=dt.datetime.today().strftime("%Y-%m-%d")
 	name=today+"-"+extention+"-"+ID
 	
@@ -85,7 +88,7 @@ def folder_name(ID, extention):
 
 
 def list_name(dic):
-#this is to create a full list name with len(dict)
+	''' this is to create a full list name with len(dict) '''
 #++++++++++++ NOT VERY USEFUL HERE ++++++++++++
 	list_n=list()
 	b_name="file"
@@ -96,7 +99,7 @@ def list_name(dic):
 	return list_n
 
 def dic2list(dic):
-#this is to make the dict into lists
+	''' this is to make the dict into lists '''
 	lt=list() 
 	for key, value in dic.iteritems():
 		temp=list()
@@ -110,7 +113,7 @@ def dic2list(dic):
 	return lt
 
 def listT(dataflow):
-#this is to exchange the col and row data
+	''' this is to exchange the col and row data '''
 	x=zip(*dataflow)
 	return x
 
@@ -184,23 +187,24 @@ raw=defaultdict(list)
 
 #STEP 2: get all the TXT file names in the current folder
 #======= one function add/ 20150730======== judge what PQ measurement it is
-fl_name=list()
-files=[f for f in os.listdir('.') if os.path.isfile(f)]
+fl_name=list() # full list of column names
+#files=[f for f in os.listdir('.') if os.path.isfile(f)] # get all files in current folder
 extention=raw_input("please enter files extention: ")
+files = glob.glob('.'+os.sep+'*.'+extention)
+print 'got files with extention: '+extention + ' ' + str(files)
 
 #=================if not, judge if the file is same as the first one
-counter=1 #===>>> this is for the judgement. If this is the first file, get the measurement ID/ 
+counter=1 #===>>> this is for the judgement. If this is the first file, get the measurement ID/
 for f in files:
-	if f[-3:] == extention:
-		if counter==1:
-			m_id=get_M_ID(f)
-			fl_name.append(f)
-			# print "fl_name: " fl_name
-		elif get_M_ID(f) != m_id: 
-			continue
-		else:
-			fl_name.append(f)
-		counter+=1
+	if counter==1:
+		m_id=get_M_ID(f)
+		fl_name.append(f)
+		# print "fl_name: " fl_name
+	elif get_M_ID(f) != m_id: 
+		continue
+	else:
+		fl_name.append(f)
+	counter+=1
 
 #STEP 3: collect the data from files one by one 
 #========and make the dict file for all the dat data
