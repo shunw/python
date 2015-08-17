@@ -4,9 +4,10 @@ import sys
 import os
 import datetime as dt
 import shutil
+import glob
 
 def get_data(fl, raw):
-#this is to make the data out of the function
+	''' this is to make the data out of the function '''
 	for line in open(fl, 'r'):
 		item=line.rstrip()
 		fd=re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
@@ -22,18 +23,21 @@ def get_data(fl, raw):
 			raw[fd]=data
 
 def get_data_1(fl, raw, fd_list):
-#this is to make the data out of the function
+	''' this is to make the data out of the function '''
 	temp=list() #===>>> this is the name list in the dat/ txt file
 	#this is to get all the field name in the dat file
 	print fl
 	for line in open(fl, 'r'):
 		item=line.rstrip()
-		dat_=re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
+		eqIndex = item.rfind('=')
+		if eqIndex == -1: # cannot find the equal sign in the item
+			continue
+		dat_= item[0:eqIndex] #re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
 		
-		if re.findall('=.*', item)[0][1:]=="":
+		if eqIndex == len(item)-1: #re.findall('=.*', item)[0][1:]=="":
 			data="NA"
 		else:
-			data=re.findall('=.*', item)[0][1:]
+			data= item[eqIndex+1:] #re.findall('=.*', item)[0][1:]
 		#the following 4 lines is for the 1st entry of the dict
 		try:
 			raw[dat_].append(data)
@@ -52,12 +56,15 @@ def get_data_1(fl, raw, fd_list):
 
 
 def collect_field(fl_names):
-#this is to collect all the field name in all the files: 
+	''' this is to collect all the field name in all the files: '''
 	fd_list=list()
 	for f in fl_names:
 		for line in open(f, 'r'):
-			item=line.rstrip()
-			fd=re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
+			item=line.strip()
+			eqIndex = item.rfind('=')
+			if eqIndex == -1: # cannot find the equal sign in the item
+				continue
+			fd= item[0:eqIndex] #re.findall('.*=', item)[0][:len(re.findall('.*=', item)[0])-1]
 
 			if fd in fd_list:
 				continue
@@ -66,18 +73,21 @@ def collect_field(fl_names):
 	#print fd_list, len(fd_list)
 	return fd_list
 	
-def get_M_ID(filename):
-#this is to judge the what measurement the file contain. 
+def get_M_ID(filename, fieldName='TestPageID'):
+	''' this is to judge the what measurement the file contain. '''
 	for lines in open(filename, 'r'): 
 		item=lines.rstrip()
 		
-		if re.search(".*TestPageID=.*", item):
+		if re.search(".*"+fieldName+"=.*", item):
 			m_number=re.findall('=.*', item)[0][1:]
 	#print m_number
+	print 'Key: ' + fieldName + '; Value: ' + m_number
 	return m_number
 	
 		
 def folder_name(ID, extention):
+	''' Folder name with current date string.
+	output format is currentDate-extension-ID'''
 	today=dt.datetime.today().strftime("%Y-%m-%d")
 	name=today+"-"+extention+"-"+ID
 	
@@ -85,7 +95,7 @@ def folder_name(ID, extention):
 
 
 def list_name(dic):
-#this is to create a full list name with len(dict)
+	''' this is to create a full list name with len(dict) '''
 #++++++++++++ NOT VERY USEFUL HERE ++++++++++++
 	list_n=list()
 	b_name="file"
@@ -96,7 +106,7 @@ def list_name(dic):
 	return list_n
 
 def dic2list(dic):
-#this is to make the dict into lists
+	''' this is to make the dict into lists '''
 	lt=list() 
 	for key, value in dic.iteritems():
 		temp=list()
@@ -110,7 +120,7 @@ def dic2list(dic):
 	return lt
 
 def listT(dataflow):
-#this is to exchange the col and row data
+	''' this is to exchange the col and row data '''
 	x=zip(*dataflow)
 	return x
 
@@ -174,68 +184,72 @@ def movetree(src_dir, dst_dir, names):
         shutil.move(src_file, dst_dir)
 
 
+def operate(m_id, fl_name):
+	''' m_id is the id field value, fl_name is file list which has the field id '''
+	#STEP 1: make the empty dict file first
+	raw=defaultdict(list)
+
+	#STEP 2: get all the TXT file names in the current folder
+	#======= one function add/ 20150730======== judge what PQ measurement it is
+	#fl_name=list() # full list of files contains the same id
+
+
+	#STEP 3: collect the data from files one by one 
+	#========and make the dict file for all the dat data
+	#========IF THIS IS DAT FILE, NEED TO COLLECT THE FIELD FIRST
+	fd_list=collect_field(fl_name)
+	print fd_list, len(fd_list)
+	for n in fl_name:
+		get_data_1(n, raw, fd_list)
+
+
+	#STEP 4: make the dict to list
+	#========exchange the col and row
+	#print raw
+	data_0=sorted(dic2list(raw))
+	dataflow=listT(data_0)
+	#print dataflow
+
+	#STEP 5: write into the csv files
+	fd_name=folder_name(m_id, extention)
+	output_name=fd_name+".csv"
+	writeListData(output_name, dataflow)
+
+	#STEP 6: move all the files to the backupfolder. 
+	#====>>> create a new folder/ w date/ w test page ID/ w txt or dat
+
+	if not os.path.exists(fd_name):
+	    os.mkdir(fd_name)
+		
+	#====>>> move all the files to the backupone
+	scr= os.path.dirname(os.path.realpath(__file__)) #"C:\Users\lishunw\My Work\program\Python\data_imp"
+	dest=scr+os.sep+fd_name
+
+	movetree(scr, dest, fl_name)
+	#========================END========================
+
 #READ ME
 #PURPOSE: get all TXT files in the folder and make the csv data
 
 
-#STEP 1: make the empty dict file first
-from collections import defaultdict
-raw=defaultdict(list)
 
-#STEP 2: get all the TXT file names in the current folder
-#======= one function add/ 20150730======== judge what PQ measurement it is
-fl_name=list()
-files=[f for f in os.listdir('.') if os.path.isfile(f)]
+from collections import defaultdict
+
+#files=[f for f in os.listdir('.') if os.path.isfile(f)] # get all files in current folder
 extention=raw_input("please enter files extention: ")
+files = glob.glob('.'+os.sep+'*.'+extention)
+print 'got files with extention: '+extention + ' ' + str(files)
 
 #=================if not, judge if the file is same as the first one
-
+#idGot = False #===>>> this is for the judgement. If this is the first file, get the measurement ID/
+idFileListDict = {} # [id1:[fileList1], id2:[fileList2], ...]
 for f in files:
-	counter=1 #===>>> this is for the judgement. If this is the first file, get the measurement ID/ 
-	if f[-3:] == extention:
-		#print counter
-		if counter==1:
-			m_id=get_M_ID(f)
-			fl_name.append(f)
-			print m_id
-		elif get_M_ID(f) != m_id: 
-			continue
-		else:
-			fl_name.append(f)
-		counter+=1
+	fieldId = get_M_ID(f)
+	if fieldId not in idFileListDict:
+		idFileListDict[fieldId] = [f]
+	else:
+		idFileListDict[fieldId].append(f)
 
-#STEP 3: collect the data from files one by one 
-#========and make the dict file for all the dat data
-#========IF THIS IS DAT FILE, NEED TO COLLECT THE FIELD FIRST
-fd_list=collect_field(fl_name)
-print fd_list, len(fd_list)
-for n in fl_name:
-	get_data_1(n, raw, fd_list)
-
-
-#STEP 4: make the dict to list
-#========exchange the col and row
-print raw
-data_0=sorted(dic2list(raw))
-dataflow=listT(data_0)
-print dataflow
-
-#STEP 5: write into the csv files
-output_name=extention+m_id+".csv"
-writeListData(output_name, dataflow)
-
-#STEP 6: move all the files to the backupfolder. 
-#====>>> create a new folder/ w date/ w test page ID/ w txt or dat
-fd_name=folder_name(m_id, extention)
-
-if not os.path.exists(fd_name):
-    os.mkdir(fd_name)
-	
-#====>>> move all the files to the backupone
-scr= "/Users/zhang" #"C:\Users\lishunw\My Work\program\Python\data_imp"
-dest=scr+os.sep+fd_name
-
-movetree(scr, dest, fl_name)
-#========================END========================
-
+for (k, v) in idFileListDict.items():
+	operate(k, v)
 
