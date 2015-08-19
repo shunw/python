@@ -1,43 +1,56 @@
 # -*- coding: utf-8 -*-
 import codecs
 import sys
+from collections import defaultdict
 
 dec='utf-8'
 
-def cha_compare(l, ch_type_id, dec):
+def cha_compare(q_mean, type_id, voc_dic, dec):
 	#define the col function
-	ch_type_id=int(ch_type_id)
-	ans=l.split()[ch_type_id].encode(dec)
-	mean=l.split()[-1].encode(dec)
-	if ch_type_id==1:
-		ch_type='あか型'
-	else:
-		ch_type='文字型'
-
-	inp=raw_input(mean+ch_type+"or enter 'stop' to stop: ")
+	tp={1: 'あか型', 2: '文字型'}
+	inp=raw_input(q_mean.encode(dec)+tp[type_id]+"or enter 'stop' to stop: ")
 	if inp=='stop':
-		sys.exit(0)
-	elif inp==ans:
+		sys.exit(0)	
+	elif inp==voc_dic[q_mean][type_id].encode(dec):
 		print "yes"
 	else:
-		print "the ans is " + ans
+		print "the ans is " + voc_dic[q_mean][type_id].encode(dec)	
+
+def make_vocls(fl, voc_dic, dec):
+	#transfer the file to the dict
+	handler=codecs.open(fl, 'r', dec)
+	counter=1
+	for line in handler:
+		if counter!=1:
+			k=line.split()[-1]
+			for v in line.split()[:-1]:
+				voc_dic[k].append(v)
+		counter+=1
+	return voc_dic
 
 if __name__ == '__main__':
-	f = codecs.open('data-j.txt', 'r', dec)
-	counter=1
-	for l in f:
-		if counter!=1:
-			# *********************** this is disfunction ****************
-			if l.split()[2]=="*":
-				cha_compare(l, 1, dec)
-			else:
-				ch_type_id=raw_input("want あか型 1 or 文字型 2: ")
-				cha_compare(l, ch_type_id, dec)
-				
-				if raw_input("want to try the other type? y/n: ")=='y':
-					cha_compare(l, 3-int(ch_type_id), dec)
-		counter+=1
+	voc_dic=defaultdict(list)
+	voc_dic=make_vocls('data-j.txt', voc_dic, dec)
+			
+	#get the random key
+	#************ ING *****************
+	aka_id=1
+	ch_id=2
 
+	q_mean=voc_dic.keys()[1]
+	q_aka=voc_dic[q_mean][aka_id]
+	q_ch=voc_dic[q_mean][ch_id]
+
+	print q_mean, q_aka, q_ch
+		
+	#compare the key and the input, parameter should include: q, dict
+	cha_compare(q_mean, aka_id, voc_dic,dec)
+	if voc_dic[q_mean][ch_id]!='*':
+		cha_compare(q_mean, ch_id, voc_dic, dec)
+	
+
+
+# for the txt file, maybe could only store in the dict and store the keys in a list. shuffle the list. 
 # check when the open file is csv file/ with several ones. 
 # random
 # 生词本 --- consider complete one/ also consider be stopped one. 
