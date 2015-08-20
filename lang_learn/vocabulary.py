@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import codecs
 import sys
+import random
 from collections import defaultdict
 
 dec='utf-8'
@@ -28,6 +29,12 @@ def make_vocls(fl, voc_dic, dec):
 		counter+=1
 	return voc_dic
 
+def ran(key_list):
+	#make the random key
+	key_random=key_list
+	random.shuffle(key_random)
+	return key_random
+
 if __name__ == '__main__':
 	voc_dic=defaultdict(list)
 	voc_dic=make_vocls('data-j.txt', voc_dic, dec)
@@ -37,21 +44,23 @@ if __name__ == '__main__':
 	aka_id=1
 	ch_id=2
 
-	q_mean=voc_dic.keys()[1]
-	q_aka=voc_dic[q_mean][aka_id]
-	q_ch=voc_dic[q_mean][ch_id]
-
-	print q_mean, q_aka, q_ch
-		
-	#compare the key and the input, parameter should include: q, dict
-	cha_compare(q_mean, aka_id, voc_dic,dec)
-	if voc_dic[q_mean][ch_id]!='*':
-		cha_compare(q_mean, ch_id, voc_dic, dec)
+	key_random=list()
+	key_random=voc_dic.keys()
+	random.shuffle(key_random)
 	
+	for q_mean in key_random:	
+		q_aka=voc_dic[q_mean][aka_id]
+		q_ch=voc_dic[q_mean][ch_id]
+
+		#compare the key and the input, parameter should include: q, dict
+		cha_compare(q_mean, aka_id, voc_dic,dec)
+		if voc_dic[q_mean][ch_id]!='*':
+			cha_compare(q_mean, ch_id, voc_dic, dec)
+		
 
 
-# for the txt file, maybe could only store in the dict and store the keys in a list. shuffle the list. 
-# check when the open file is csv file/ with several ones. 
-# random
+# ---- for the txt file, maybe could only store in the dict and store the keys in a list. shuffle the list. 
+# ---- check when the open file is csv file/ with several ones. 
+# ---- random
 # 生词本 --- consider complete one/ also consider be stopped one. 
 # 比较平假名 比较中文
