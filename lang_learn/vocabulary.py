@@ -64,8 +64,13 @@ if __name__ == '__main__':
 			if inp == stop_input: need_break = True; break
 			operate_word(voc_dic, voc_dic_w, q_mean, i, inp)
 
-
-	print voc_dic_w	
+	#========================================
+	#write the 生词dict
+	#========================================
+	output=codecs.open('output.txt', 'w', dec)
+	for k, v in voc_dic_w.items():
+		f_line='\t'.join(v)+'\t'+k+'\n'
+		output.write(f_line)
 
 
 
