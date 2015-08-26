@@ -4,6 +4,7 @@ import random
 from collections import defaultdict
 import glob
 import os
+import word_func
 
 dec='utf-8'
 tp={1: 'あか型', 2: '文字型'}
@@ -17,18 +18,6 @@ def operate_word(voc_dic, voc_dic_w, q_mean, type_id, inp):
 	else: print 'yes'
 		
 
-def make_vocls(fl, voc_dic, dec):
-	'''transfer the file to the dict'''
-	handler=codecs.open(fl, 'r', dec)
-	counter=1
-	for line in handler:
-		if counter!=1:
-			k=line.split()[-1]
-			for v in line.split()[:-1]: voc_dic[k].append(v)
-		counter+=1
-	return voc_dic
-
-
 #========================================
 # MAIN
 #========================================
@@ -41,7 +30,7 @@ if __name__ == '__main__':
 	#========================================
 	files=glob.glob('.'+os.sep+'*.'+'txt')
 	for f in files: 
-		voc_dic=make_vocls(f, voc_dic, dec)
+		voc_dic=word_func.make_vocls(f, voc_dic, dec)
 	
 	#========================================
 	#get the random key
