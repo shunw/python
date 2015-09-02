@@ -40,8 +40,6 @@ def testNestEggFixed():
     # [1000.0, 2150.0, 3472.5, 4993.375, 6742.3812499999995]
 
     # TODO: Add more test cases here.
-if __name__ == '__main__':
-    testNestEggFixed()
 
 #
 # Problem 2
@@ -57,6 +55,14 @@ def nestEggVariable(salary, save, growthRates):
       account (integers between 0 and 100).
     - return: a list of your retirement account value at the end of each year.
     """
+    account = list()
+    counter = 0
+    for i in growthRates:
+        if len(account) == 0:
+            account.append(salary*save*0.01)
+            continue
+        account.append(account[-1]*(1+0.01*i)+salary*save*0.01)
+    return account
 
 def testNestEggVariable():
     salary      = 10000
@@ -83,6 +89,15 @@ def postRetirement(savings, growthRates, expenses):
     - return: a list of your retirement account value at the end of each year.
     """
     # TODO: Your code here.
+    account = list()
+    counter = 0
+    for i in growthRates:
+        if len(account) == 0:
+            account.append(savings*(1+0.01*i)-expenses)
+            continue
+        account.append(account[-1]*(1+0.01*i)-expenses)
+    return account
+
 
 def testPostRetirement():
     savings     = 100000
@@ -95,6 +110,7 @@ def testPostRetirement():
     # -4799.9999999999854, -34847.999999999985]
 
     # TODO: Add more test cases here.
+
 
 #
 # Problem 4
@@ -128,3 +144,6 @@ def testFindMaxExpenses():
     # 1229.95548986
 
     # TODO: Add more test cases here.
+
+if __name__ == '__main__':
+    testFindMaxExpenses()
