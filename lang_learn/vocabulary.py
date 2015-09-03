@@ -5,6 +5,7 @@ from collections import defaultdict
 import glob
 import os
 import word_func
+import datetime as dt
 
 dec='utf-8'
 tp={1: 'あか型', 2: '文字型'}
@@ -15,7 +16,8 @@ def operate_word(voc_dic, voc_dic_w, q_mean, type_id, inp):
 	if not ok: 
 		voc_dic_w[q_mean]=voc_dic[q_mean]
 		print "the ans is " + voc_dic[q_mean][type_id].encode(dec)
-	else: print 'yes'
+	else: 
+		print 'yes'
 		
 
 #========================================
@@ -46,17 +48,30 @@ if __name__ == '__main__':
 	#========================================
 	need_break = False
 	for q_mean in key_random:
-		if (need_break): break
+		if (need_break): 
+			break
 		for i in range(1,3):
-			if voc_dic[q_mean][i]=='*': continue
+			if voc_dic[q_mean][i]=='*': 
+				continue
+			
 			inp=raw_input(q_mean.encode(dec)+tp[i]+"or enter '"+stop_input+"' to stop: ")
-			if inp == stop_input: need_break = True; break
+
+			if inp == stop_input: 
+				need_break = True
+				break
+			
+			print "here"
 			operate_word(voc_dic, voc_dic_w, q_mean, i, inp)
+
+			
 
 	#========================================
 	#write the 生词dict
 	#========================================
-	output=codecs.open('output.txt', 'w', dec)
+	output = codecs.open('output.txt', 'a', dec)
+	now = dt.datetime.now()
+	line = '\n'*2 + str(now.strftime("%Y-%m-%d %H:%M")) + '\n' + '\n' 
+	output.write(line)
 	for k, v in voc_dic_w.items():
 		f_line='\t'.join(v)+'\t'+k+'\n'
 		output.write(f_line)
