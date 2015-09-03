@@ -130,6 +130,22 @@ def findMaxExpenses(salary, save, preRetireGrowthRates, postRetireGrowthRates,
       the investment fund at the end of retirement.
     """
     # TODO: Your code here.
+    pre_account = nestEggVariable(salary, save, preRetireGrowthRates)
+    
+    low = 0
+    high = pre_account[-1]+epsilon
+    expenses = (low+high)/2
+    post_account = postRetirement(pre_account[-1], postRetireGrowthRates, expenses)
+
+    while post_account[-1] < 0 or post_account[-1] > epsilon:
+        if post_account[-1] < 0:
+            high = expenses
+        else: 
+            low = expenses
+        expenses = (low+high)/2
+        post_account = postRetirement(pre_account[-1], postRetireGrowthRates, expenses)
+
+    return expenses
 
 def testFindMaxExpenses():
     salary                = 10000

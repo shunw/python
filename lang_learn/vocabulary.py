@@ -60,7 +60,6 @@ if __name__ == '__main__':
 				need_break = True
 				break
 			
-			print "here"
 			operate_word(voc_dic, voc_dic_w, q_mean, i, inp)
 
 			

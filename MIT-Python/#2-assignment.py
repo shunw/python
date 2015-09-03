@@ -1,37 +1,52 @@
-#problem 1 for the 1000th prime data
-from math import *
 
-def prime_n(len_n):
-	n = 3
-	prime = list()
-	prime.append(2)
-	prime.append(3)
+pack_1 = 6
+pack_2 = 9
+pack_3 = 20
 
-	while len(prime) <= len_n-1:
-		n += 2
-		b_divide = False
-		for i in prime:
-			if n % i == 0: 
-				b_divide = True
+
+def get_solution(ord_qty):
+	
+	for a in range(ord_qty/pack_1+1):
+		for b in range(ord_qty/pack_2+1):
+			for c in range(ord_qty/pack_3+1):
+				combination = list()
+				if a * pack_1 + b * pack_2 + c * pack_3 == ord_qty:
+					combination.append(a)
+					combination.append(b)
+					combination.append(c)
+					#com_total.append(combination)
+					return combination				
+
+def get_list(n):
+	ls = list()
+	for i in range(6):
+		ls.append(n+i)
+	return ls
+
+if __name__ == '__main__':
+	# ===========================================
+	# this is to get the minimum number of the continuous 6 number 
+	# ===========================================
+	n = 6
+	judge = True
+	while (judge):
+		for i in range(6):
+			if get_solution(n+i) == None: 
+				n = n+i+1
 				break
-		if not b_divide: prime.append(n)
-	return prime
+			if i == 5: judge = False
 	
-
-if __name__ == '__main__':	
-	num = int(raw_input('please enter a number for prime qty: '))
-	prime = prime_n(num)
-	product_sum = 1
-	for i in prime: 
-		product_sum *= i
-	log_sum = log(product_sum)
-	e_n = e**num
-
-	print 'log_sum = ', log_sum
-	print 'num = ', prime[-1]
-	print 'ratio = ', log_sum/prime[-1]
-
-
-
-
+	# ===========================================
+	# this is to check the max number cannot be packaged
+	# ===========================================
+	while get_solution(n) != None:
+		n -= 1
+	print 'Largest number of McNuggets that cannot be bought in exact quantity: <', n, '>'
 	
+	# ===========================================
+	# this is to test the minimum continuous 6 number
+	# ===========================================
+	# for i in get_list(44):
+	# 	print get_solution(i), i
+
+
