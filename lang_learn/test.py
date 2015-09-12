@@ -5,24 +5,13 @@ from collections import defaultdict
 import glob
 import os
 import word_func
+import re
 from jNlp.jTokenize import jTokenize
 
-dec = 'utf-8'
-#========================================
-# MAIN
-#========================================
-if __name__ == '__main__':
-	# voc_dic=defaultdict(list)
-	# voc_dic_w=defaultdict(list)
+lis = ['牛奶（片假名）./data-j6.txt', '今天早上./data-j4.txt', '商店./data-j6.txt', '牛奶（片假名）./data-j12.txt']
+a = '牛奶'
+for i in lis:
 	
-	# voc_dic=word_func.make_vocls('data-j1.txt', voc_dic, dec)
-	
-	# for i in voc_dic.keys():
-	# 	if i.strip() == '请多关照'.decode(dec):
-	# 		print voc_dic[i][1]
-
-	
-	input_sentence = u'私は彼を５日前、つまりこの前の金曜日に駅で見かけた'
-	list_of_tokens = jTokenize(input_sentence)
-	print list_of_tokens
-	print '--'.join(list_of_tokens).encode('utf-8')
+	try: print re.match(a, i).group(0)
+	except: print 'na'
+	 

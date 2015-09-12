@@ -10,7 +10,8 @@ def make_vocls(fl, voc_dic, dec):
 	for line in handler:
 		if counter!=1 and len(line.split())!=0:
 			ls=re.split(r'\t+', line.rstrip('\t'))
-			k=ls[-1]
-			for v in ls[:-1]: voc_dic[k].append(v)
+			k=ls[-2]+fl
+			voc_dic[k].append(fl)
+			for v in ls[:-2]: voc_dic[k].append(v)
 		counter+=1
 	return voc_dic

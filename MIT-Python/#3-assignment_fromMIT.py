@@ -18,7 +18,28 @@ key11 = 'atg'
 key12 = 'atgc'
 key13 = 'atgca'
 
+### problem 1
+def countSubStringMatch(target,key):
+    fir_find = 0
+    counter = 0
+    while fir_find+len(key) < len(target):
+        fir_find = find(target, key, fir_find)
+        # raw_input('please enter anything here to continue... ')
+        fir_find += 1
+        counter += 1
+    print counter
+    
+def countSubStringMatchRecursive (target, key):
+    #countSubStringMatchRecursive(target, key)
+    index = find(target, key)
+    if index < 0: return 0
+    return countSubStringMatchRecursive(target[index+len(key): ], key)+1
 
+
+
+if __name__ == '__main__':
+    print countSubStringMatchRecursive(target1, key10)
+    
 
 ### the following procedure you will use in Problem 3
 
