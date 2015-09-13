@@ -36,9 +36,20 @@ def countSubStringMatchRecursive (target, key):
     return countSubStringMatchRecursive(target[index+len(key): ], key)+1
 
 
+### problem 2
+def subStringMatchExact(target,key):
+    fir_index = tuple()
+    fir_index = (find(target, key),)
+    while find(target, key, fir_index[-1]+1) >= 0:
+        # print fir_index, find(target, key, fir_index[-1]+1)
+        fir_index = fir_index+(find(target, key, fir_index[-1]+1), )
+    return fir_index
+
+
 
 if __name__ == '__main__':
-    print countSubStringMatchRecursive(target1, key10)
+    print subStringMatchExact(target1, key13)
+
     
 
 ### the following procedure you will use in Problem 3
