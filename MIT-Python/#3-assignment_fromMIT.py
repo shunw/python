@@ -47,13 +47,16 @@ def subStringMatchExact(target,key):
 
 
 
-if __name__ == '__main__':
-    print subStringMatchExact(target1, key13)
-
-    
 
 ### the following procedure you will use in Problem 3
 
+def constrainedMatchPair(firstMatch,secondMatch,length):
+    ans = ()
+    for i in firstMatch:
+        for j in secondMatch:
+            if i+length+1 == j: 
+                ans=ans+(i,)
+    return ans
 
 def subStringMatchOneSub(key,target):
     """search for all locations of key in target, with one substitution"""
@@ -63,7 +66,7 @@ def subStringMatchOneSub(key,target):
         # key1 and key2 are substrings to match
         key1 = key[:miss]
         key2 = key[miss+1:]
-        print 'breaking key',key,'into',key1,key2
+        # print 'breaking key',key,'into',key1,key2
         # match1 and match2 are tuples of locations of start of matches
         # for each substring in target
         match1 = subStringMatchExact(target,key1)
@@ -72,7 +75,22 @@ def subStringMatchOneSub(key,target):
         # need to filter pairs to decide which are correct
         filtered = constrainedMatchPair(match1,match2,len(key1))
         allAnswers = allAnswers + filtered
-        print 'match1',match1
-        print 'match2',match2
-        print 'possible matches for',key1,key2,'start at',filtered
+        # print 'match1',match1
+        # print 'match2',match2
+        # print 'possible matches for',key1,key2,'start at',filtered
     return allAnswers
+
+### problem 4
+def subStringMatchExactlyOneSub(target,key):
+    only_sub = ()
+    no_sub = subStringMatchExact(target,key)
+    w_sub = subStringMatchOneSub(key, target)
+    for i in w_sub:
+        if i not in no_sub:
+            only_sub = only_sub+(i,)
+    print 'no_sub is: ', no_sub
+    print 'w_sub is: ', w_sub
+    print 'only_sub is: ', only_sub
+
+if __name__ == '__main__':
+    subStringMatchExactlyOneSub(target2, key13)
