@@ -20,14 +20,24 @@ for line in handler:
 		for item in data_row:
 			if data_row.index(item) == 0: continue
 			print item, data_row.index(item)
-		from_form = int(raw_input('please choose which type is the from_form: '))
+		from_form_0 = int(raw_input('please choose which type is the from_form: '))
 		for item in data_row:
-			if data_row.index(item) == from_form or data_row.index(item) == 0: continue
+			if data_row.index(item) == from_form_0 or data_row.index(item) == 0: continue
 			print item, data_row.index(item)
-		to_form = int(raw_input('please choose which type is the to_form: '))
+		to_form_0 = int(raw_input('please choose which type is the to_form: '))
 	
 	#-- make dict, and prepare the test. 
+	#-- if the 文字型is *, need to replace with the かた型
 	else: 
+		from_form = from_form_0
+		to_form = to_form_0
+		
+		if data_row[from_form_0] == '*':
+			from_form = 1
+
+		elif data_row[to_form_0] == '*':
+			to_form = 1
+		
 		data_dict[data_row[from_form]] = data_row[to_form]
 
 	line_counter += 1
@@ -36,10 +46,16 @@ key_random = data_dict.keys()
 random.shuffle(key_random)
 
 #-- provide questions
+correct_qty = 0
+error_qty = 0
 for q in key_random:
 	ans_opt = raw_input('print "stop" to stop the test\n'+q.encode(dec)+'"'+Field[from_form].encode(dec)+'"'+', please give form '+'"'+Field[to_form].encode(dec)+'": ')
 	if ans_opt == 'stop': break
-	elif ans_opt == data_dict[q]:
+	elif ans_opt.decode(dec) == data_dict[q]:
+		correct_qty += 1
 		print 'yes'
 	else: 
+		error_qty +=1
 		print 'ans is: ', data_dict[q]
+print 'Total test words are: ', correct_qty+error_qty
+print 'Error words are: ', error_qty
