@@ -152,6 +152,24 @@ def update_hand(hand, word):
     returns: dictionary (string -> int)
     """
     # TO DO ...
+    # -- solution 1
+    for i in word:
+        hand[i] = hand[i]-1
+    return hand
+
+    # --- solution 2
+    # hand_w = dict()
+    # hand_n = dict()
+    # for letter in word: 
+    #     hand_w[letter] = hand_w.get(letter, 0)+1
+    # for letter in hand.keys():
+    #     if letter not in hand_w.keys(): 
+    #         hand_n[letter] = hand[letter]
+    #         continue
+    #     if hand[letter] == hand_w[letter]: continue
+    #     hand_n[letter] = hand[letter]-hand_w[letter]
+    # return hand_n
+
 
 #
 # Problem #3: Test word validity
@@ -167,6 +185,19 @@ def is_valid_word(word, hand, word_list):
     word_list: list of lowercase strings
     """
     # TO DO ...
+    word_temp = {}
+    for i in word:
+        if i not in hand.keys(): 
+            return False
+        word_temp[i] = word_temp.get(i, 0)+1
+        if word_temp[i] > hand[i]: return False
+    if word not in word_list: 
+        return False
+    else:
+        return True
+
+
+
 
 #
 # Problem #4: Playing a hand
@@ -200,8 +231,27 @@ def play_hand(hand, word_list):
       word_list: list of lowercase strings
     """
     # TO DO ...
-    print "play_hand not implemented." # replace this with your code...
+    
+    total_score = 0
+    while sum(hand.values()) > 0:
+        cur_score = 0
+        print 'here is the hand:', hand
+        inp_ans = raw_input('If you want to stop the game, please enter "."\nPlease enter a word with these letters: ')
+        #judge if the word is valid or not
+        while not (is_valid_word(inp_ans, hand, word_list)) and inp_ans != '.': 
+            inp_ans = raw_input('The word entered is invalid, please enter a new word with hand: ')
+        #judge if the game need to stop
+        if inp_ans == '.': break
+        #show the ans and scores
+        cur_score = get_word_score(inp_ans, sum(hand.values()))
+        total_score += cur_score
+        print 'the score for ', inp_ans, 'is: ', cur_score
+        print 'the total score till now is: ', total_score
+        #show remaining characters
+        hand = update_hand(hand, inp_ans)
 
+        print 'the remaining letters are: ', display_hand(hand)
+    print 'Congratulations!!! you complete the hand game. The total score till now is: ', total_score
 #
 # Problem #5: Playing a game
 # Make sure you understand how this code works!
@@ -248,3 +298,4 @@ if __name__ == '__main__':
     word_list = load_words()
     play_game(word_list)
 
+    
