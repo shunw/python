@@ -8,10 +8,24 @@ import word_func
 import re
 from jNlp.jTokenize import jTokenize
 
-lis = ['牛奶（片假名）./data-j6.txt', '今天早上./data-j4.txt', '商店./data-j6.txt', '牛奶（片假名）./data-j12.txt']
-a = '牛奶'
-for i in lis:
-	
-	try: print re.match(a, i).group(0)
-	except: print 'na'
-	 
+dec = 'utf-8'
+
+# voc_dic = defaultdict(list)
+# files=glob.glob('.'+os.sep+'d*-j1.txt')
+# print files
+# di = word_func.make_vocls(files, voc_dic, dec)
+# print di
+
+# num = raw_input('enter the number')
+# if len(num.split('-')) == 1:
+# 	print num
+# else:
+# 	start = int(num.split('-')[0])
+# 	end = int(num.split('-')[1])
+# 	for i in range(start, end+1):
+# 		print i
+
+start = str(1)
+end = str(2)
+files=glob.glob('.'+os.sep+'d*-j['+start+'-'+end+'].txt')
+print files
