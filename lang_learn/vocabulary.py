@@ -110,8 +110,8 @@ if __name__ == '__main__':
 		for q_mean in key_random:
 			if (need_break): 
 				break
+			error_count_sign = 1
 			for i in range(1,3):
-				error_count_sign = 1
 				if voc_dic[q_mean][i]=='*': 
 					continue
 				#此处的 tp[i-1]对应的是tp={1: 'あか型', 2: '文字型'}； 因为dict list里的位置改了，所以用i-1来对应tp的位置
@@ -125,7 +125,10 @@ if __name__ == '__main__':
 			
 			if error_count_sign == 0:
 				error_count +=1
-			counter += 1
+			if inp != 'stop' or i!=1:
+				counter += 1
+			# print 'error_c is ', error_count
+			# print 'counter is ', counter
 			
 		
 		print "Review vocabulary qty is: ", counter
