@@ -27,10 +27,6 @@ def evaluate_poly(poly, x):
         result = poly[0]
     return result
 
-if __name__ == '__main__':
-    poly = (0.0, 0.0, 5.0, 9.3, 7.0)
-    x = -13
-    print evaluate_poly(poly, x)
 
 def compute_deriv(poly):
     """
@@ -46,6 +42,15 @@ def compute_deriv(poly):
     returns: tuple of numbers
     """
     # TO DO ... 
+    der_list = list()
+    for index in range(len(poly)):
+        if index == 0: continue
+        der_list.append(index * poly[index])
+    return tuple(der_list)
+
+
+
+
 
 def compute_root(poly, x_0, epsilon):
     """
@@ -69,3 +74,16 @@ def compute_root(poly, x_0, epsilon):
     """
     # TO DO ... 
 
+    time = 0
+    x = x_0
+    der_poly = compute_deriv(poly)
+    while abs(evaluate_poly(poly, x)) > epsilon:
+        x = x - evaluate_poly(poly, x) / evaluate_poly(der_poly, x)
+        time += 1
+    return (x, time)
+
+if __name__ == '__main__':
+    poly = (-13.39, 0.0, 17.5, 3.0, 1.0) 
+    x_0 = 0.1
+    epsilon = .0001
+    print compute_root(poly, x_0, epsilon)
