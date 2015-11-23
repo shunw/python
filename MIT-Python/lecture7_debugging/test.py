@@ -1,0 +1,1 @@
+decision = raw_input('for a new game, pls enter -->> %s; \nto play last hand, pls enter -->> %s; \nto exit, please enter -->> %s; \nPls make your choice: ' % ('n', 'r', 'e'))
