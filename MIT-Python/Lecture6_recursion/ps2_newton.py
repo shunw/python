@@ -52,7 +52,7 @@ def compute_deriv(poly):
 
 
 
-def compute_root(poly, x_0, epsilon):
+def compute_root_while(poly, x_0, epsilon):
     """
     Uses Newton's method to find and return a root of a polynomial function.
     Returns a tuple containing the root and the number of iterations required
@@ -82,8 +82,20 @@ def compute_root(poly, x_0, epsilon):
         time += 1
     return (x, time)
 
+
+def compute_root(poly, x_0, epsilon, time):
+    if abs(evaluate_poly(poly, x_0)) > epsilon:
+        x_0 = x_0 - evaluate_poly(poly, x_0) / evaluate_poly(compute_deriv(poly), x_0)
+        time += 1
+        return compute_root(poly, x_0, epsilon, time)
+
+    else:
+        print x_0, time
+        return x_0, time
+        
+    
 if __name__ == '__main__':
     poly = (-13.39, 0.0, 17.5, 3.0, 1.0) 
     x_0 = 0.1
     epsilon = .0001
-    print compute_root(poly, x_0, epsilon)
+    print compute_root(poly, x_0, epsilon, 0), x_0
