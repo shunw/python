@@ -57,7 +57,7 @@ guess = choose_word(wordlist)
 guess_list = list(guess)
 show_list = list('_' * len(guess_list))
 
-cycle = 8
+cycle = 25
 alphs = list(string.ascii_lowercase)
 
 print 'Welcome to the game, Hangman!'
@@ -65,25 +65,29 @@ print 'I am thinking of a word what is %d letters long. ' % len(guess)
 
 while cycle >= 0:
     print '------------------------------'    
-    print 'You have %d guesses left. ' % cycle
+    print 'You have %d guesses left. ' % (cycle+1)
     print 'Available letters: %s' % ''.join(alphs)
-    alp_inp = raw_input('Please guess a letter: ')
+    alp_inp = raw_input('Please guess a letter: ').lower()
     if (alp_inp in guess_list) and (alp_inp in alphs): 
         show_list = show_alps(alp_inp, show_list, guess_list)
-        print 'Good guess: %s' %''.join(show_list)
+        print 'Good guess: %s' %' '.join(show_list)
         alphs.remove(alp_inp)
         if '_' not in show_list: 
             print '------------------------------'    
             print 'Congratulations, you won!'
             break
-    elif alp_inp not in guess_list:
-        print 'Oops! That letter is not in my word: %s' %''.join(show_list)
-        cycle -= 1
+    
     elif alp_inp not in alphs:
-        print 'Oops! That letter is not in available letters: %s' %''.join(alphs)
+        print 'Oops! That letter is already guessed: %s' %''.join(alphs)
+        
+    elif alp_inp not in guess_list:
+        print 'Oops! That letter is not in my word: %s' %' '.join(show_list)
+        alphs.remove(alp_inp)
         cycle -= 1
+    
 
 if (cycle < 0) and ('_' in show_list):
     print '------------------------------'    
     print 'Oops, you lose!'
+    print 'The answer is: %s' %guess
             
