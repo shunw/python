@@ -266,15 +266,33 @@ def play_game(word_list):
     * If the user inputs anything else, ask them again.
     """
     # TO DO...
-
-    decision = raw_input('for a new game, pls enter -->> %s; \nto play last hand, pls enter -->> %s; \nto exit, please enter -->> %s; \nPls make your choice: ' % ('n', 'r', 'e'))
-
+    hand_new = dict()
+    hand_last = dict()
+    while True: 
+        hand_last = hand_new
+        decision = raw_input('for a new game, pls enter -->> %s; \nto play last hand, pls enter -->> %s; \nto exit, please enter -->> %s; \nPls make your choice: ' % ('n', 'r', 'e'))
+        if (decision != 'e') and (decision != 'r') and (decision != 'n'):
+            print 'Wrong decision. Please make your choice again.'
+            continue
+        elif decision == 'e': 
+            print 'Game End. '
+            break
+        elif decision == 'r':
+            #??? how to make the game renew
+            if len(hand_last) == 0:
+                print 'Not last hand can be used. '
+            else: 
+                play_hand(hand_last, word_list)
+        else: 
+            hand_len = int(random.uniform(8, 12))
+            hand_new = deal_hand(hand_len)
+            play_hand(hand_new, word_list)
 #
 # Build data structures used for entire session and play game
 #
 if __name__ == '__main__':
     word_list = load_words()
     play_game(word_list)
-    hand1 = {'a':1, 'c':1, 'i':1, 'h':1, 'm':2, 'z':1}
-    hand2 = {'a':1, 's':1, 't':2, 'w':1, 'f':1, 'o':1}
-    play_hand(hand2, word_list)
+    # hand1 = {'a':1, 'c':1, 'i':1, 'h':1, 'm':2, 'z':1}
+    # hand2 = {'a':1, 's':1, 't':2, 'w':1, 'f':1, 'o':1}
+    # play_hand(hand2, word_list)
