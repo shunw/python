@@ -104,6 +104,7 @@ if __name__ == '__main__':
 		#return the 生词dict
 		#========================================
 		need_break = False
+		need_skip = False
 		counter = 0
 		error_count = 0
 		counter_gen = 0
@@ -115,20 +116,25 @@ if __name__ == '__main__':
 				if voc_dic[q_mean][i]=='*': 
 					continue
 				#此处的 tp[i-1]对应的是tp={1: 'あか型', 2: '文字型'}； 因为dict list里的位置改了，所以用i-1来对应tp的位置
-				inp=raw_input(q_mean.encode(dec)+tp[i]+"or enter '"+stop_input+"' to stop: ")
+				inp=raw_input(q_mean.encode(dec)+tp[i]+"\nEnter %s to stop; Enter %s to skip: " %(stop_input, 's'))
 
 				if inp == stop_input: 
 					need_break = True
 					break
 				
+				if inp == 's':
+					need_skip = True
+					break
 				error_count_sign = error_count_sign*operate_word(voc_dic, voc_dic_w, q_mean, i, inp)
 			
 			if error_count_sign == 0:
 				error_count +=1
-			if inp != 'stop' or i!=1:
+			if  inp != 's' and (inp != 'stop' or i!=1):
 				counter += 1
-			# print 'error_c is ', error_count
-			# print 'counter is ', counter
+			print 'error_c is ', error_count
+			print 'counter is ', counter
+			if (need_skip):
+				continue
 			
 		
 		print "Review vocabulary qty is: ", counter
