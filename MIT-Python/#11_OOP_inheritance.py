@@ -133,8 +133,8 @@ if __name__ == '__main__':
 
     # print '_lt__(p1, p2) =', Person.__lt__(p1, p2)
     # print 'p1 == p4 =', p1 == p4
-    # print 'p4 < p3 =', p4 < p3
-    # print 'p3 < p4 =', p3 < p4
+    print 'p4 < p3 =', p4 < p3
+    print 'p3 < p4 =', p3 < p4
 
     ug1 = UG('Jane Doe')
     ug2 = UG('Jane Doe')
