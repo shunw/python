@@ -99,6 +99,42 @@ class UG(MITPerson):
     def getYear(self):
         return self.year
 
+class G(MITPerson):
+    pass
+
+class CourseList(object):
+    def __init__(self, number):
+        self.number = number
+        self.students = []
+
+    def addStudent(self, who):
+        if not who.isStudent():
+            raise TypeError('Not a student')
+        if who in self.students:
+            raise ValueError('Duplicate student')
+        self.students.append(who)
+
+    def remStudent(self, who):
+        try:
+            self.students.remove(who)
+        except:
+            print str(who) + ' not in ' + self.number
+    def allStudents(self):
+        for s in self.students:
+            yield s
+
+    def ugs(self):
+        indx = 0
+        while indx < len(self.students):
+            if type(self.students[indx]) == UG:
+                yield self.students[indx]
+            indx += 1
+    def __str__(self):
+        if len(self.students)<1:
+            pass
+        p_str = ', '.join(map(str, self.students))
+        return p_str
+
 
 if __name__ == '__main__':
     # me = Person('John Guttag')
@@ -114,37 +150,83 @@ if __name__ == '__main__':
     # print 'The people in pList are:'
     # for p in pList:
     #     print p
-    p1 = MITPerson('Barbara Beaver')
-    # print p1, p1.getIdNum()
+    # p1 = MITPerson('Barbara Beaver')
+    # # print p1, p1.getIdNum()
 
-    p2 = MITPerson('Sue Yuan')
-    # print p2, p2.getIdNum()
+    # p2 = MITPerson('Sue Yuan')
+    # # print p2, p2.getIdNum()
 
-    # print 'p1 < p2 =', p1 < p2
+    # # print 'p1 < p2 =', p1 < p2
 
-    p3 = MITPerson('Sue Yuan')
-    p4 = Person('Sue Yuan')
+    # p3 = MITPerson('Sue Yuan')
+    # p4 = Person('Sue Yuan')
 
-    # print p2 == p3
-    # print Person.__lt__(p2, p3)
-    # print p4, p3
-    # print p4 == p3
-    # # print p3 < p4
+    # # print p2 == p3
+    # # print Person.__lt__(p2, p3)
+    # # print p4, p3
+    # # print p4 == p3
+    # # # print p3 < p4
 
-    # print '_lt__(p1, p2) =', Person.__lt__(p1, p2)
-    # print 'p1 == p4 =', p1 == p4
-    print 'p4 < p3 =', p4 < p3
-    print 'p3 < p4 =', p3 < p4
+    # # print '_lt__(p1, p2) =', Person.__lt__(p1, p2)
+    # # print 'p1 == p4 =', p1 == p4
+    # print 'p4 < p3 =', p4 < p3
+    # print 'p3 < p4 =', p3 < p4
 
-    ug1 = UG('Jane Doe')
-    ug2 = UG('Jane Doe')
-    p3 = MITPerson('Sue Yuan')
-    ug1.setYear(5)
-    print ug1.getIdNum()
+    # ug1 = UG('Jane Doe')
+    # ug2 = UG('Jane Doe')
+    # p3 = MITPerson('Sue Yuan')
+    # ug1.setYear(5)
+    # print ug1.getIdNum()
 
     '''
+    closed: 
     question 1: why there is p1==p4 here, it should use the __lt__. If so, it should always be false. 
-    question 2: p4 < p3 is correct, but p3 < p4 prompt error message. does this mean p4 < p3 uses the Person.__lt__ / and p3 < p4 uses the MIT.Person.__lt__???
+    question 2: p4 < p3 is correct, but p3 < p4 prompt error message. does this mean p4 < p3 uses the Person.__lt__ / and p3 < p4 uses the MIT.Person.__lt__ ---> yes
     question 3: which one is class variable
     status: till 43 min
+    '''
+
+    # ug1 = UG('Jane Doe')
+    # g1 = G('Mitch Peabody')
+    # g2 = G('Ryan Jackson')
+    # print type(ug1) == UG
+
+    m1 = MITPerson('Barbara Beaver')            
+    ug1 = UG('Jane Doe')
+    ug2 = UG('John Doe')
+    g1 = G('Mitch Peabody')
+    g2 = G('Ryan Jackson')
+    g3 = G('Sarina Canelake')
+    SixHundred = CourseList('6.00')
+    SixHundred.addStudent(ug1)
+    print ug1
+    print SixHundred
+    SixHundred.addStudent(g1)
+    print g1
+    print SixHundred
+    print ug2
+    SixHundred.addStudent(ug2)
+    print SixHundred
+
+    # try:
+    #    SixHundred.addStudent(m1)
+    # except:
+    #    print 'Whoops'
+    # print SixHundred
+
+    '''
+    why always show 
+    
+    $ python \#11_OOP_inheritance.py
+    Jane Doe
+    Jane Doe
+    Mitch Peabody
+    Jane Doe, Mitch Peabody
+    John Doe
+    Traceback (most recent call last):
+      File "#11_OOP_inheritance.py", line 208, in <module>
+        SixHundred.addStudent(ug2)
+      File "#11_OOP_inheritance.py", line 114, in addStudent
+        raise ValueError('Duplicate student')
+    ValueError: Duplicate student
     '''
