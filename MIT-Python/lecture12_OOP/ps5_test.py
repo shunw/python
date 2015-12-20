@@ -208,6 +208,7 @@ class ProblemSet5(unittest.TestCase):
         noc = NewsStory('', '', '', "something something new york city", '')
 
         triggers = [pt, self.tt, self.ft]
+        print triggers
         stories = [a, b, c, noa, nob, noc]
         filtered_stories = filter_stories(stories, triggers)
         for story in stories:

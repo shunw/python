@@ -129,12 +129,51 @@ class SummaryTrigger(WordTrigger):
 # Problems 6-8
 
 # TODO: NotTrigger
-# TODO: AndTrigger
-# TODO: OrTrigger
+class NotTrigger(Trigger):
+    def __init__(self, judge):
+        Trigger.__init__(self)
+        self.judge = judge
+    def evaluate(self, story):
+        j = self.judge.evaluate(story)
+        if not j: return True
+        else: return False
 
+# TODO: AndTrigger
+class AndTrigger(Trigger):
+    def __init__(self, judge1, judge2):
+        Trigger.__init__(self)
+        self.judge1 = judge1
+        self.judge2 = judge2
+    def evaluate(self, story):
+        j1 = self.judge1.evaluate(story)
+        j2 = self.judge2.evaluate(story)
+        if j1 and j2: return True
+        else: return False
+
+# TODO: OrTrigger
+class OrTrigger(Trigger):
+    def __init__(self, judge1, judge2):
+        Trigger.__init__(self)
+        self.judge1 = judge1
+        self.judge2 = judge2
+    def evaluate(self, story):
+        j1 = self.judge1.evaluate(story)
+        j2 = self.judge2.evaluate(story)
+        if j1 or j2: return True
+        else: return False
 
 # Phrase Trigger
 # Question 9
+class PhraseTrigger(Trigger):
+    def __init__(self, text):
+        Trigger.__init__(self)
+        self.text = text
+    def evaluate(self, story):
+        j1 = self.text in story.get_subject()
+        j2 = self.text in story.get_title()
+        j3 = self.text in story.get_summary()
+        if j1 or j2 or j3: return True
+        else: return False
 
 # TODO: PhraseTrigger
 
@@ -153,7 +192,14 @@ def filter_stories(stories, triggerlist):
     # TODO: Problem 10
     # This is a placeholder (we're just returning all the stories, with no filtering) 
     # Feel free to change this line!
-    return stories
+    stories_ft = list()
+    for st in stories:    
+        for key in triggerlist: 
+            if key.evaluate(st): 
+                stories_ft.append(st)
+                break
+
+    return stories_ft
 
 #======================
 # Part 4
@@ -176,12 +222,55 @@ def readTriggerConfig(filename):
         if len(line) == 0 or line[0] == '#':
             continue
         lines.append(line)
-
+    
     # TODO: Problem 11
     # 'lines' has a list of lines you need to parse
     # Build a set of triggers from it and
     # return the appropriate ones
+
+    # wendy's code from here
+    addition = list()
+    triggerlist = list()
+    trigger_dict_all = dict()   # this is to get all the info
+    trigger_dict_basic = dict() # this is just to make the title/ subject/ summary/ phrase trigger
+
+    word_t = ['SUBJECT', 'TITLE', 'SUMMARY', 'PHRASE']
+    judge_t = ['AND', 'OR', 'NOT']
+    for item in lines: 
+        w_1 = item[: item.find(' ')]
+        w_2 = item[item.find(' ')+1: item.find(' ', item.find(' ')+1)]
+        if w_1 == 'ADD': 
+            value = item.split()
+            for v in value[1: ]:
+                addition.append(v)
+        elif w_2 in judge_t: 
+            value = item.split()
+            trigger_dict_all[w_1] = value[1: ]
+        else:
+            trigger_dict_all[w_1] = [w_2, item[item.find(' ', item.find(' ')+1)+1: ]]
     
+    
+    for k in trigger_dict_all.keys():
+        print k, trigger_dict_all[k][0]
+        if trigger_dict_all[k][0] in word_t:
+            if trigger_dict_all[k][0] == 'TITLE': trigger_dict_basic[k] = TitleTrigger(trigger_dict_all[k][1])
+            elif trigger_dict_all[k][0] == 'SUMMARY': trigger_dict_basic[k] = SummaryTrigger(trigger_dict_all[k][1])
+            elif trigger_dict_all[k][0] == 'SUBJECT': trigger_dict_basic[k] = SubjectTrigger(trigger_dict_all[k][1])
+            elif trigger_dict_all[k][0] == 'PHRASE': trigger_dict_basic[k] = PhraseTrigger(trigger_dict_all[k][1])
+
+    for k in trigger_dict_all.keys():
+        if trigger_dict_all[k][0] in judge_t:
+            if trigger_dict_all[k][0] == 'AND': trigger_dict_basic[k] = AndTrigger(trigger_dict_basic[trigger_dict_all[k][1]], trigger_dict_basic[trigger_dict_all[k][2]])
+            elif trigger_dict_all[k][0] == 'OR': trigger_dict_basic[k] = OrTrigger(trigger_dict_basic[trigger_dict_all[k][1]], trigger_dict_basic[trigger_dict_all[k][2]])
+            elif trigger_dict_all[k][0] == 'NOT': trigger_dict_basic[k] = NotTrigger(trigger_dict_basic[trigger_dict_all[k][1]])
+    print trigger_dict_basic
+    print trigger_dict_all
+    print addition
+    for i in addition:
+        triggerlist.append(trigger_dict_basic[i])
+    print triggerlist
+    return triggerlist
+
 import thread
 
 def main_thread(p):
@@ -195,7 +284,7 @@ def main_thread(p):
     
     # TODO: Problem 11
     # After implementing readTriggerConfig, uncomment this line 
-    #triggerlist = readTriggerConfig("triggers.txt")
+    triggerlist = readTriggerConfig("triggers.txt")
 
     guidShown = []
     
