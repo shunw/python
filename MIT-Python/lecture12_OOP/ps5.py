@@ -45,7 +45,24 @@ def process(url):
 
 # Problem 1
 
-# TODO: NewsStory
+class NewsStory(object):
+    def __init__(self, guid, title, subject, summary, link):
+        self.guid = guid
+        self.title = title
+        self.subject = subject
+        self.summary = summary
+        self.link = link
+    def get_guid(self):
+        return self.guid
+    def get_title(self):
+        return self.title
+    def get_subject(self):
+        return self.subject
+    def get_summary(self):
+        return self.summary
+    def get_link(self):
+        return self.link
+
 
 #======================
 # Part 2
@@ -64,11 +81,49 @@ class Trigger(object):
 # Problems 2-5
 
 # TODO: WordTrigger
+def deal_word(strg):
+    for i in string.punctuation:
+        if i not in strg: continue
+        else: strg = strg.replace(i, ' ')
+    return strg.split()
+
+class WordTrigger(Trigger):
+    def __init__(self, text):
+        Trigger.__init__(self)
+        self.text = text.lower()
+    def is_word_in(self, story_word):
+        compare = deal_word(story_word)
+        # print self.text
+        # print compare
+        if self.text in compare: return True
+        else: return False
 
 # TODO: TitleTrigger
-# TODO: SubjectTrigger
-# TODO: SummaryTrigger
+class TitleTrigger(WordTrigger):
+    def __init__(self, text):
+        WordTrigger.__init__(self, text)
 
+    def evaluate(self, story):
+        story_word = story.get_title().lower()
+        return self.is_word_in(story_word)
+
+# TODO: SubjectTrigger
+class SubjectTrigger(WordTrigger):
+    def __init__(self, text):
+        WordTrigger.__init__(self, text)
+
+    def evaluate(self, story):
+        story_word = story.get_subject().lower()
+        return self.is_word_in(story_word)
+
+# TODO: SummaryTrigger
+class SummaryTrigger(WordTrigger):
+    def __init__(self, text):
+        WordTrigger.__init__(self, text)
+
+    def evaluate(self, story):
+        story_word = story.get_summary().lower()
+        return self.is_word_in(story_word)
 
 # Composite Triggers
 # Problems 6-8
