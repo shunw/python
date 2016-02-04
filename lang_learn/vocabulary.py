@@ -43,9 +43,12 @@ if __name__ == '__main__':
 		#========================================
 		if lesson_num != 'rev':
 			if len(lesson_num.split('-')) != 1:
-				start = lesson_num.split('-')[0]
-				end = lesson_num.split('-')[1]
-				files = glob.glob('.'+os.sep+'d*-j['+start+'-'+end+'].txt')
+				files = list()
+				start = int(lesson_num.split('-')[0])
+				end = int(lesson_num.split('-')[1])
+				for j_n in range(start, end+1):
+					files.extend(glob.glob('.'+os.sep+'d*-j'+str(j_n)+'.txt'))
+				# print files
 			else: 
 				files = glob.glob('.'+os.sep+'d*-j'+lesson_num+'.txt')
 			for f in files: 

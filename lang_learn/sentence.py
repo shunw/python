@@ -12,36 +12,57 @@ import word_func
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':
-	sentence = defaultdict(list)
+	sentence = list()
 	'''
-	sentence = {'中文意思': [file name, 日文句子]}
+	sentence = [[file1，item＃1, 日1, 中1，日2，中2，日3，中3]，[file1，item＃2, 日1, 中1，日2，中2，日3，中3]]
 	'''
 	#========================================
 	#import all the files from the current dir, the result is a list
 	#========================================
-	files = glob.glob('.'+os.sep+'d*-s*.'+'txt')
-	# files = ['data-s8.txt']  # this is for debugging
+	# files = glob.glob('.'+os.sep+'d*-s*.'+'txt')
+	files = ['data-s13.txt', 'data-s1.txt']  # this is for debugging
+
+	# following is to create the sentence
 	for f in files:
 		handler = codecs.open(f, 'r', dec)
-		counter = 0
-		for line in handler:
-			if counter == 0: 
-				counter += 1
-				continue
-			if len(line.split()) == 0: continue
-			row = line.split('\t')
-			sentence[row[-1]].append(f)
-			sentence[row[-1]].append(row[1])
-	
-	keys = sentence.keys()
-	random.shuffle(keys)
 
-	for k in keys:
-		ans = raw_input(k.encode(dec) + '\nOr please enter "stop" to stop: \n')
-		if ans == 'stop': break
-		if ans != sentence[k][1].encode(dec):
-			print 'the ans is: %s' % (sentence[k][1].encode(dec))
-		else: 
-			print 'bingo!'
+		for line in handler:
+			sen = line.strip()
+			if len(sen) == 0: continue 
+			
+			if sen == '1':
+				temp = list()
+				temp.append(f)
+				temp.append(sen)
+
+			elif len(sen) < 3 and sen != '1':
+				sentence.append(temp)
+				temp = list()
+				temp.append(f)
+				temp.append(sen)
+			
+			else: 
+				temp.append(sen)
+			
+	
+	
+	random.shuffle(sentence)
+
+	# for i in sentence:
+	# 	for n in i:
+	# 		print n.encode(dec)
+	stop_sign = False
+	for s in sentence:
+		if stop_sign: break
+		for k in range(1, len(s)/2):
+			ans = raw_input(s[k*2+1].encode(dec) + '\nOr please enter "skip" to skip:' + '\nOr please enter "stop" to stop: \n')
+			if ans == 'skip': break
+			if ans == 'stop': 
+				stop_sign = True
+				break
+			if ans != s[k*2].encode(dec):
+				print 'the ans is: %s' % (s[k*2].encode(dec))
+			else: 
+				print 'bingo!'
 
 	
