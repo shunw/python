@@ -8,6 +8,8 @@ import random
 
 import ps6_visualize
 import pylab
+import matplotlib.pyplot as plt
+import numpy as np
 
 # === Provided classes
 
@@ -40,12 +42,16 @@ class Position(object):
         """
         old_x, old_y = self.getX(), self.getY()
         # Compute the change in position
-        delta_y = speed * math.cos(math.radians(angle))
-        delta_x = speed * math.sin(math.radians(angle))
+        delta_y = speed * math.cos(math.radians(float(angle)))
+        delta_x = speed * math.sin(math.radians(float(angle)))
         # Add that to the existing position
         new_x = old_x + delta_x
         new_y = old_y + delta_y
         return Position(new_x, new_y)
+    def __eq__(self, position):
+        return self.x == position.x and self.y == position.y
+    def __str__(self):
+        return str(self.x) + ', ' + str(self.y)
 
 # === Problems 1
 
@@ -79,7 +85,9 @@ class RectangularRoom(object):
 
         pos: a Position
         """
-        self.cleaned.append(pos)
+        if pos not in self.cleaned:  
+            self.cleaned.append(pos)
+        return self.cleaned
 
     def isTileCleaned(self, m, n):
         """
@@ -91,7 +99,7 @@ class RectangularRoom(object):
         n: an integer
         returns: True if (m, n) is cleaned, False otherwise
         """
-        if (m, n) in self.cleaned:
+        if Position(m, n) in self.cleaned:
             return True
         else: False
     
@@ -117,7 +125,8 @@ class RectangularRoom(object):
 
         returns: a Position object.
         """
-        return (random.uniform(self.width), random.uniform(self.height))
+        return Position(random.uniform(0, self.width), random.uniform(0, self.height))
+        
 
     def isPositionInRoom(self, pos):
         """
@@ -126,11 +135,15 @@ class RectangularRoom(object):
         pos: a Position object.
         returns: True if pos is in the room, False otherwise.
         """
-        x, y = pos
-        if x <= self.width and y <= self.height:
+        x = pos.getX()
+        y = pos.getY()
+
+        if (0 <= x <= self.width) and (0 <= y <= self.height):
             return True
         else: return False
 
+    def clear(self):
+        self.cleaned[:] = []
 
 class Robot(object):
     """
@@ -152,7 +165,7 @@ class Robot(object):
         speed: a float (speed > 0)
         """
         self.room = room
-        self.speed = float(speed)
+        self.speed = speed
 
     def getRobotPosition(self):
         """
@@ -177,7 +190,7 @@ class Robot(object):
 
         position: a Position object.
         """
-        self.pos = Position(position)
+        self.pos = position
 
     def setRobotDirection(self, direction):
         """
@@ -194,15 +207,46 @@ class Robot(object):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
+        tile_pos = Postion(int(math.floor(self.pos.getX())), int(math.floor(self.pos.getY())))
+        self.room.cleanTileAtPosition(tile_pos)
         self.pos = self.pos.getNewPosition(self.dir, self.speed)
-        self.room.cleanTileAtPosition(int(math.floor(self.pos.getX)), int(math.floor(self.pos.getY)))
+
 # === Problem 2
+
+def get_rand_angle():
+    return random.uniform(0, 360)
+
 class StandardRobot(Robot):
     """
     A StandardRobot is a Robot with the standard movement strategy.
 
     At each time-step, a StandardRobot attempts to move in its current direction; when
     it hits a wall, it chooses a new direction randomly.
+    """
+    def __init__(self, room, speed):
+        Robot.__init__(self, room, speed)
+
+    def updatePositionAndClean(self):
+        """
+        Simulate the passage of a single time-step.
+
+        Move the robot to a new position and mark the tile it is on as having
+        been cleaned.
+        """
+        self.pos_new = self.pos.getNewPosition((get_rand_angle()), self.speed)
+        print 'dir is: ', self.dir
+        while not (self.room.isPositionInRoom(self.pos_new)): 
+            self.pos_new = self.pos.getNewPosition((get_rand_angle()), self.speed)
+        self.pos = self.pos_new
+        pos_new_1 = Position(int(math.floor(self.pos.getX())), int(math.floor(self.pos.getY())))
+        self.room.cleanTileAtPosition(pos_new_1)
+
+# === Problem 5
+
+class RandomWalkRobot(Robot):
+    """
+    A RandomWalkRobot is a robot with the "random walk" movement strategy: it
+    chooses a new direction at random after each time-step.
     """
     def updatePositionAndClean(self):
         """
@@ -211,13 +255,38 @@ class StandardRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        self.pos_new = self.pos.getNewPosition(self.dir, self.speed)
-        while room.isPositionInRoom(self.pos_new): 
-            self.pos_new = self.pos.getNewPosition(self.setRobotDirection(int(random.uniform(0, 360))), self.speed)
+        self.pos_new = self.pos.getNewPosition(self.getRobotDirection(), self.speed)
+        print 'dir is: ', self.getRobotDirection()
+        
+        while not (self.room.isPositionInRoom(self.pos_new)): 
+            self.pos_new = self.pos.getNewPosition(get_rand_angle(), self.speed)
+            
         self.pos = self.pos_new
-        self.room.cleanTileAtPosition(int(math.floor(self.pos.getX)), int(math.floor(self.pos.getY)))
+        pos_new_1 = Position(int(math.floor(self.pos.getX())), int(math.floor(self.pos.getY())))
+        self.room.cleanTileAtPosition(pos_new_1)
+
 
 # === Problem 3
+
+def one_trial(room, rob_list, min_coverage, num_robots, width, height):
+    '''
+    room is a class object
+    rob_list is a rob class list
+    min_coverage is a percentage of the room need to be cleaned
+    '''
+    time_step_qty = 0
+    # anim = ps6_visualize.RobotVisualization(num_robots, width, height)
+    for r in rob_list:
+        r.setRobotPosition(room.getRandomPosition())
+    while float(room.getNumCleanedTiles())/float(room.getNumTiles()) < min_coverage:
+        for r in rob_list:
+            r.updatePositionAndClean()
+        # anim.update(room, rob_list)
+        time_step_qty += 1
+    # anim.done()
+    return time_step_qty
+
+
 
 def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
                   robot_type):
@@ -237,45 +306,91 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     robot_type: class of robot to be instantiated (e.g. Robot or
                 RandomWalkRobot)
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    
+    # make the robot name
+    R_var = list()
+    
+    Room = RectangularRoom(width, height)
+    # initiate the robot with class
+    for i in range(num_robots):
+        temp = robot_type(Room, speed)
+        temp.setRobotDirection(0.0)
+        R_var.append(temp)
+
+    total = 0
+    for i in range(num_trials):
+        total += one_trial(Room, R_var, min_coverage, num_robots, width, height)
+        Room.clear()
+   
+    return int(total/float(num_trials))
+
+if __name__ == '__main__':
+    runSimulation(1, 1.0, 5, 5, 0.8, 10, StandardRobot)
 
 
 # === Problem 4
 #
-# 1) How long does it take to clean 80% of a 20×20 room with each of 1-10 robots?
+# 1) How long does it take to clean 80% of a 20*20 room with each of 1-10 robots?
 #
 # 2) How long does it take two robots to clean 80% of rooms with dimensions 
-#	 20×20, 25×16, 40×10, 50×8, 80×5, and 100×4?
+#	 20*20, 25*16, 40*10, 50*8, 80*5, and 100*4?
 
 def showPlot1():
     """
     Produces a plot showing dependence of cleaning time on number of robots.
     """ 
-    raise NotImplementedError
+    num = range(1, 11)
+    time_s_avg = list()
+    for i in num:
+        time_s_avg.append(runSimulation(i, 1.0, 20, 20, .8, 30, StandardRobot))
+    
+    num = np.asarray(num)
+    time_s_avg = np.asarray(time_s_avg)
+    fig = plt.figure()
+    axc = fig.add_subplot(111)
+    axc.plot(num, time_s_avg)
+    axc.set_xlabel('number of robot')
+    axc.set_ylabel('avg of time-step needed')
+    axc.set_title('number of robot vesus the avg of time-step needed')
+
+    plt.show()
 
 def showPlot2():
     """
     Produces a plot showing dependence of cleaning time on room shape.
     """
-    raise NotImplementedError
+    area = 400
+    width = [20, 25, 40, 50, 80, 100]
+    height = [area/i for i in width]
 
-# === Problem 5
+    time_s_avg = list()
+    ratio = list()
+    for i in range(len(width)): 
+        time_s_avg.append(runSimulation(2, 1.0, width[i], height[i], .8, 30, StandardRobot))
+        ratio.append(width[i]/(height[i]*1.0))
 
-class RandomWalkRobot(Robot):
-    """
-    A RandomWalkRobot is a robot with the "random walk" movement strategy: it
-    chooses a new direction at random after each time-step.
-    """
-    raise NotImplementedError
+    ratio = np.asarray(ratio)
+    time_s_avg = np.asarray(time_s_avg)
+
+    fig = plt.figure()
+    axc = fig.add_subplot(111)
+    axc.plot(ratio, time_s_avg)
+    axc.set_xlabel('ratio of height and width')
+    axc.set_ylabel('avg of time-step needed')
+    axc.set_title('ratio of height and width vesus the avg of time-step needed')
+
+    plt.show()
 
 
-# === Problem 6
 
-# For the parameters tested below (cleaning 80% of a 20x20 square room),
-# RandomWalkRobots take approximately twice as long to clean the same room as
-# StandardRobots do.
-def showPlot3():
-    """
-    Produces a plot comparing the two robot strategies.
-    """
-    raise NotImplementedError
+# # === Problem 6
+
+# # For the parameters tested below (cleaning 80% of a 20x20 square room),
+# # RandomWalkRobots take approximately twice as long to clean the same room as
+# # StandardRobots do.
+# def showPlot3():
+#     """
+#     Produces a plot comparing the two robot strategies.
+#     """
+#     raise NotImplementedError
