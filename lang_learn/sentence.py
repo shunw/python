@@ -9,6 +9,10 @@ import re
 
 import word_func
 
+'''
+this function is to check the sentence in the text book
+'''
+
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':

@@ -9,6 +9,10 @@ import re
 
 import word_func
 
+'''
+to find the first ひらがな in one words, just for fun
+'''
+
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':

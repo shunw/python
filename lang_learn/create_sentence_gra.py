@@ -8,6 +8,10 @@ from collections import defaultdict
 
 import word_func
 
+'''
+create sentence with random grammar and words
+'''
+
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':

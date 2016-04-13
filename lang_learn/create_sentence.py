@@ -8,6 +8,11 @@ from collections import defaultdict
 
 import word_func
 
+'''
+create sentence with random words
+but seems there are some bugs
+'''
+
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':
@@ -15,7 +20,7 @@ if __name__=='__main__':
 	#========================================
 	#import all the files from the current dir
 	#========================================
-	files = glob.glob('.'+os.sep+'d*.'+'txt')
+	files = glob.glob('.'+os.sep+'d*j*.'+'txt')
 	for f in files:
 		voc_lib = word_func.make_vocls(f, voc_lib, dec)
 	word_qty = len(voc_lib)

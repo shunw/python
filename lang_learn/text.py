@@ -9,6 +9,10 @@ import re
 
 import word_func
 
+'''
+to choose the random text and then check how many sentences are still be remembered. 
+'''
+
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':
