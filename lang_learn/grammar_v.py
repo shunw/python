@@ -15,21 +15,24 @@ create sentence with random grammar and words
 dec = 'utf-8'
 stop_input = 'stop'
 if __name__=='__main__':
-	gram_file = 'grammar.txt'
+	gram_file = 'grammar_v.txt'
 	verb_file = 'data-v.txt'
 	gram_handle = open(gram_file)
 	gram_data = {}
+	counter = 1
+	# following two is the position of the grammar and the verb 
+	gra = 0
+	q_verb = 1
+
 
 	#========================================
 	# get the gram data
+	# changed the structure of the grammar txt 2016-04-16
 	#========================================
-	counter = 0
 	for line in gram_handle:
 		line_data = line.strip().split('\t')
-		if counter == 0:
-			counter += 1
-			continue
-		gram_data[line_data[1]] = line_data[2]
+		if len(line_data) <= 1 or (line_data[0].decode(dec)).isnumeric(): continue
+		gram_data[line_data[gra]] = line_data[q_verb]
 
 	#========================================
 	# shuffle the keys
@@ -49,7 +52,7 @@ if __name__=='__main__':
 			v_ind = line_list.index('原型')
 			k += 1
 			continue
-		if len(line_list) <= 3: continue 
+		if len(line_list) <= 1: continue 
 		if line_list[v_ind] in verb_list: continue
 		verb_list.append(line_list[v_ind])
 
@@ -71,8 +74,9 @@ if __name__=='__main__':
 		#get the n you want to create the sentence
 		#========================================
 		print 'pls create the sentence with' + '\n'+ str(item)
-		sentence = raw_input('with words　' + chosen_word_str + '\n' + 'or enter '+ stop_input +'if you want to stop: ')
+		sentence = raw_input('with words　' + chosen_word_str + '\n' + 'or enter "STOP" or "SKIP" if you want to stop: ')
 		if sentence == stop_input: break
+		if sentence == 'skip': continue
 		
 		#========================================
 		#write into a txt file for the future reference
