@@ -33,15 +33,29 @@ if __name__ == '__main__':
 	voc_dic_w=defaultdict(list)
 
 	#========================================
+	#to find all the words files. and offer the max lesson later. 
+	#========================================
+	files=glob.glob('.'+os.sep+'d*-j*'+'txt')
+	all_lesson = list()
+	for i in files: 
+		if len(re.findall('[0-9]+', i)) == 0: continue
+		all_lesson.append(int(re.findall('[0-9]+', i)[0]))
+	
+	#========================================
 	#choose the txt number you want to recite, or just choose all
 	#========================================
-	lesson_num = raw_input('recite ALL or SEARCH word? pls enter "all": \nIf review ERROR HISTROY, enter "rev": \nOtherwise enter the lesson number (like 1 or like 1-3), you want to recite: \nMake your choice: ')
+	lesson_num = raw_input('recite ALL or SEARCH word? pls enter "all": \nIf review ERROR HISTROY, enter "rev": \nOtherwise enter the lesson number (like 1 or like 1-3, max num is: %d), you want to recite: \nMake your choice: ' % (max(all_lesson)))
 
 	if lesson_num != 'all':
 		#========================================
 		#import one lesson number: one lesson or a range of lesson
 		#========================================
 		if lesson_num != 'rev':
+
+			# this is to check prevent if the entered lesson number is larger than the existing lesson number.
+			while int(re.findall('[0-9]+', lesson_num)[-1]) > max(all_lesson): 
+				lesson_num = raw_input('lesson number is out of range, please re-enter the lesson num. \nPls enter the lesson number (like 1 or like 1-3, max num is: %d)' %(max(all_lesson)))
+
 			if len(lesson_num.split('-')) != 1:
 				files = list()
 				start = int(lesson_num.split('-')[0])
@@ -63,7 +77,7 @@ if __name__ == '__main__':
 		#========================================
 		#import all the files from the current dir
 		#========================================
-		files=glob.glob('.'+os.sep+'d*-j*'+'txt')
+		
 		for f in files: 
 			voc_dic=word_func.make_vocls(f, voc_dic, dec)
 
@@ -151,6 +165,8 @@ if __name__ == '__main__':
 		
 		print "Review vocabulary qty is: ", counter
 		print "Review vocabulary error qty is: ", error_count
+		if counter != 0: 
+			print "Correct Percentage is: ", round((1-error_count*1.0/counter)*100)
 
 		#========================================
 		#write the 生词dict
