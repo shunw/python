@@ -55,20 +55,16 @@ class startRowCol:
 	def closeFile(self):
 		#self.fileStream.close()
 		pass
+		
+	def setIndex(self, startRowIndex, startColIndex):
+		self.startRow = startRowIndex
+		self.startCol = startColIndex
 
 	def getIndex(self):
 		rowIndex = 0
 		for row in self.csvData:
 			#print str(row)
 			if rowIndex > 0: #bypass the first row
-				colIndex = 0
-				# for col in row:
-				# 	if self.startCol == -1 and not is_empty(col):
-				# 		#print str(rowIndex) +', '+ str(colIndex) + ': ' + str(row)
-				# 		self.startCol = colIndex
-				# 		break
-				# 	colIndex += 1
-				# if self.startCol == -1: continue
 				if not is_empty(row[self.startCol-1]): # find the row title index
 					self.startRow = rowIndex
 					break
