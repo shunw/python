@@ -23,8 +23,8 @@ if __name__=='__main__':
 	#========================================
 	#import all the files from the current dir, the result is a list
 	#========================================
-	files = glob.glob('.'+os.sep+'d*-s1.'+'txt')
-	# files = glob.glob('.'+os.sep+'d*-s*.'+'txt')
+	# files = glob.glob('.'+os.sep+'d*-s1.'+'txt')
+	files = glob.glob('.'+os.sep+'d*-s*.'+'txt')
 
 	# following is to create the sentence
 	for f in files:
