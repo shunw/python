@@ -23,8 +23,8 @@ if __name__=='__main__':
 	#========================================
 	#import all the files from the current dir, the result is a list
 	#========================================
+	files = glob.glob('.'+os.sep+'d*-s1.'+'txt')
 	# files = glob.glob('.'+os.sep+'d*-s*.'+'txt')
-	files = ['data-s13.txt', 'data-s1.txt']  # this is for debugging
 
 	# following is to create the sentence
 	for f in files:
@@ -51,6 +51,7 @@ if __name__=='__main__':
 	
 	
 	random.shuffle(sentence)
+	# print sentence
 
 	# for i in sentence:
 	# 	for n in i:
@@ -59,7 +60,7 @@ if __name__=='__main__':
 	for s in sentence:
 		if stop_sign: break
 		for k in range(1, len(s)/2):
-			ans = raw_input(s[k*2+1].encode(dec) + '\nOr please enter "skip" to skip:' + '\nOr please enter "stop" to stop: \n')
+			ans = raw_input(s[0][s[0].find('-') +1 : ] + s[k*2+1].encode(dec) + '\nOr please enter "skip" to skip:' + '\nOr please enter "stop" to stop: \n')
 			if ans == 'skip': break
 			if ans == 'stop': 
 				stop_sign = True

@@ -277,51 +277,8 @@ class StandardRobot(Robot):
 #     print rob1.room.cleaned
 
 
-# === Problem 3
-
-def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
-                  robot_type):
-    """
-    Runs NUM_TRIALS trials of the simulation and returns the mean number of
-    time-steps needed to clean the fraction MIN_COVERAGE of the room.
-
-    The simulation is run with NUM_ROBOTS robots of type ROBOT_TYPE, each with
-    speed SPEED, in a room of dimensions WIDTH x HEIGHT.
-
-    num_robots: an int (num_robots > 0)
-    speed: a float (speed > 0)
-    width: an int (width > 0)
-    height: an int (height > 0)
-    min_coverage: a float (0 <= min_coverage <= 1.0)
-    num_trials: an int (num_trials > 0)
-    robot_type: class of robot to be instantiated (e.g. Robot or
-                RandomWalkRobot)
-    """
-    # raise NotImplementedError
-    
-    
-    counter = 0
-    for i in range(num_trials):
-        # anim = ps6_visualize.RobotVisualization(num_robots, width, height)
-        room = RectangularRoom(width, height)       
-        
-        rob_list = list()
-        for r in range(num_robots):
-            rob_list.append(robot_type(room, speed))
-        
-        while min_coverage*room.getNumTiles() > room.getNumCleanedTiles(): 
-            for r_b in rob_list: 
-                r_b.updatePositionAndClean()
-
-            # anim.update(room, rob_list)
-            counter += 1
-            
-        # anim.done()
-    return counter*1.0/num_trials
 
 
-# if __name__ == '__main__':
-#     print runSimulation(4, 1.0, 10, 10, .9, 10, StandardRobot)
 
 # === Problem 4
 #
@@ -381,8 +338,59 @@ class RandomWalkRobot(Robot):
     chooses a new direction at random after each time-step.
     """
     # raise NotImplementedError
+    def updatePositionAndClean(self):
+        self.setRobotDirection(random.uniform(0.0, 360.0))
+        while not self.room.isPositionInRoom(self.position.getNewPosition(self.direction, self.speed)):
+            self.setRobotDirection(random.uniform(0.0, 360.0))
+        # print self.position.getX(), self.position.getY()
+        Robot.updatePositionAndClean(self)
+
+# === Problem 3
+
+def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
+                  robot_type):
+    """
+    Runs NUM_TRIALS trials of the simulation and returns the mean number of
+    time-steps needed to clean the fraction MIN_COVERAGE of the room.
+
+    The simulation is run with NUM_ROBOTS robots of type ROBOT_TYPE, each with
+    speed SPEED, in a room of dimensions WIDTH x HEIGHT.
+
+    num_robots: an int (num_robots > 0)
+    speed: a float (speed > 0)
+    width: an int (width > 0)
+    height: an int (height > 0)
+    min_coverage: a float (0 <= min_coverage <= 1.0)
+    num_trials: an int (num_trials > 0)
+    robot_type: class of robot to be instantiated (e.g. Robot or
+                RandomWalkRobot)
+    """
+    # raise NotImplementedError
+    
+    
+    counter = 0
+    for i in range(num_trials):
+        # anim = ps6_visualize.RobotVisualization(num_robots, width, height)
+        room = RectangularRoom(width, height)       
+        
+        rob_list = list()
+        for r in range(num_robots):
+            rob_list.append(robot_type(room, speed))
+        
+        while min_coverage*room.getNumTiles() > room.getNumCleanedTiles(): 
+            for r_b in rob_list: 
+                r_b.updatePositionAndClean()
+
+            # anim.update(room, rob_list)
+            counter += 1
+            
+        # anim.done()
+    return counter*1.0/num_trials
 
 
+
+# if __name__ == '__main__':
+#     print runSimulation(1, 1.0, 10, 10, .9, 10, StandardRobot)
 # === Problem 6
 
 # For the parameters tested below (cleaning 80% of a 20x20 square room),
@@ -392,4 +400,22 @@ def showPlot3():
     """
     Produces a plot comparing the two robot strategies.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    x_0 = [5, 10, 15, 20, 25, 30]
+    y_s = list()
+    y_r = list()
+    x = list()
+    for i in x_0:
+        x.append(i ** 2)
+        y_s.append(runSimulation(1, 1.0, i, i, .9, 1, StandardRobot))
+        y_r.append(runSimulation(1, 1.0, i, i, .9, 1, RandomWalkRobot))
+    plt.plot(x, y_s, 'r^', x, y_r, 'bs')
+
+    plt.xlabel('Room Area')
+    plt.ylabel('Avg Time to Clean a Room')
+    plt.title('different algorithm')
+    
+    plt.show()
+    plt.show()
+if __name__ == '__main__':
+    showPlot3()
