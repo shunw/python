@@ -18,7 +18,7 @@ conv = lambda s: dt.datetime.strptime(s, '%H:%M:%S')
 data = np.genfromtxt(a, converters={1: conv, 2: conv},
                      names=['caption', 'start', 'stop', 'state'], dtype=None)
 cap, start, stop = data['caption'], data['start'], data['stop']
-
+print data['caption']
 #Check the status, because we paint all lines with the same color 
 #together
 is_ok = (data['state'] == 'OK')
