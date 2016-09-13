@@ -20,3 +20,7 @@ LEFT   JOIN second parentdata ON parentdata.id = parent.secondary_id
 LEFT   JOIN second childdata ON childdata.id = child.secondary_id  
 WHERE  parent.parent_id = 'rootID'  
 
+##Pivot
+
+resource: http://www.oracle.com/technetwork/articles/sql/11g-pivot-097235.html  
+but still not figure out. 
