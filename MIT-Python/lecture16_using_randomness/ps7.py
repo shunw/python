@@ -3,7 +3,7 @@
 # Collaborators:
 # Time:
 
-import numpy
+import numpy as np
 import random
 import pylab
 
@@ -172,7 +172,7 @@ def simulationWithoutDrug():
     maxBirthProb = .1
     clearProb = .05
 
-    update_q = 5
+    update_q = 300
 
     vir_list = list()
     
@@ -191,4 +191,16 @@ def simulationWithoutDrug():
     # TODO
 
 if __name__ == '__main__':
-    print   simulationWithoutDrug()
+    run_time = 20
+    n = run_time
+
+    while n > 0: 
+        if n == run_time: 
+            simulation_tot = np.matrix(simulationWithoutDrug())
+        else: 
+            temp = np.matrix(simulationWithoutDrug())
+            simulation_tot = np.append(simulation_tot, temp, axis = 0)
+        
+        n -= 1
+    simulation_avg = np.mean(simulation_tot, axis = 0)
+    print simulation_avg
