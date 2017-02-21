@@ -141,14 +141,16 @@ class SimplePatient(object):
         new = list()
         for i in self.viruses:
             if i.doesClear(): continue
-            else: new.append(i)
+            new.append(i)
         self.viruses = new
 
         pop_dens = float(len(self.viruses)) / float(self.maxPop)
 
+        new_viruses = list()
         for j in self.viruses:
-            try: self.viruese.append(j.reproduce(pop_dens))
+            try: new_viruses.append(j.reproduce(pop_dens))
             except: None
+        self.viruses = self.viruses + new_viruses
         return len(self.viruses)
         # TODO
 
