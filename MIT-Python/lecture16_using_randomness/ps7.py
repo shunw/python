@@ -6,6 +6,7 @@
 import numpy as np
 import random
 import pylab
+import matplotlib.pyplot as plt
 
 ''' 
 Begin helper code
@@ -170,7 +171,9 @@ def simulationWithoutDrug():
     maxPop = 1000
 
     maxBirthProb = .1
+    # maxBirthProb = .99
     clearProb = .05
+    # clearProb = .99
 
     update_q = 300
 
@@ -197,10 +200,24 @@ if __name__ == '__main__':
     while n > 0: 
         if n == run_time: 
             simulation_tot = np.matrix(simulationWithoutDrug())
+
         else: 
             temp = np.matrix(simulationWithoutDrug())
             simulation_tot = np.append(simulation_tot, temp, axis = 0)
         
         n -= 1
     simulation_avg = np.mean(simulation_tot, axis = 0)
-    print simulation_avg
+    simulation_avg = np.array(simulation_avg)
+    
+    x = np.array(range(len(simulation_avg[0])))
+    y = simulation_avg[0]
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title('virus population vs time')
+    ax.set_xlabel('elapsed time')
+    ax.set_ylabel('population of the virus')
+    plt.plot(x, y)
+    plt.show()
+    
+    
