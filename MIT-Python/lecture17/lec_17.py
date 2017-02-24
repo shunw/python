@@ -12,8 +12,8 @@ def get_data(filename):
 			continue
 			
 		m, n = (line.strip()).split(' ')
-		distance.append(m)
-		weight.append(n)
+		distance.append(float(m))
+		weight.append(float(n))
 	return (distance, weight)
 
 def plot_spring(x_data_list, y_data_list):
@@ -22,13 +22,21 @@ def plot_spring(x_data_list, y_data_list):
 	plt.plot(y_data_a, x_data_a, 'bo')
 	plt.show()
 
+def plot_spr_n_fit(x_data_list, y_data_list, slope, inter):
+	fit_data = [i*slope+inter for i in x_data_list]
+	x_data_a = np.array(x_data_list)
+	y_data_a = np.array(y_data_list)
+	fit_data_a = np.array(fit_data)
+	plt.plot(y_data_a, x_data_a, 'bo')
+	plt.plot(fit_data_a, x_data_a)
+	plt.show()
 
 
 
 if __name__ == '__main__':
 	dis, weight= get_data("springData.txt")
-	# plot_spring(dis, weight)
-	m, b = np.polyfit(np.arange(dis), np.arange(weight), 1)
-	print m + ', ' + b
+	# print type(np.array(weight))
+	m, b = np.polyfit(np.array(dis), np.array(weight), 1)
+	plot_spr_n_fit(dis, weight, m, b)
 
-	# pause in the polyfit thing
+	# stuck in the polyfit thing
