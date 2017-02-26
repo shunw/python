@@ -88,6 +88,41 @@ def tryFits(filename):
 
 	plt.show()
 
+def rSquared(measured, estimated):
+	EE = ((measured - estimated)**2).sum()
+	ME = ((measured - measured.mean())**2).sum()
+	return 1 - EE/ME
+
+def getSpeed(filename):
+	# do the fit, and get the highest point, 
+	# then could get the time by the 9.8. After that can get the speed of it. 
+	dis, heights = get_Trajectory_data(filename)
+	heights = np.matrix(heights)
+	yval = np.mean(heights, axis = 0)
+	yval = yval.tolist()[0]
+
+	fit_poly = np.poly1d(np.polyfit(dis, yval, 2))
+	yval_fit = fit_poly(dis)
+	dis_max, dis_min = fit_poly.r
+	dis_mid = (dis_max - dis_min)/2.0
+
+	peak = fit_poly(dis_mid)
+	t = (2 * peak / (9.81 * 39.37)) ** .5
+	speed = dis_mid / t # inches/s
+	speed_f = speed / 12.0
+	
+	plt.title('Trajectory of Projectile (Mean of 4 Trials)')
+	plt.xlabel('Inches from Launch Point')
+	plt.ylabel('Inches Above Launch Point')
+	plt.plot(dis, yval, 'bo')
+	plt.plot(dis, yval_fit, 'r', label = 'Fitted Trajectory. '
+		+ 'R is: ' + str(round(rSquared(np.array(yval), yval_fit), 4)) 
+		+ ' Speed is: ' + str(round(speed_f, 2)) + 'feet/second')
+	plt.legend()
+
+	plt.show()
+
+
 
 if __name__ == '__main__':
 	# dis, weight= get_data("springData.txt")
@@ -96,4 +131,6 @@ if __name__ == '__main__':
 	# plot_spr_n_fit(weight, dis, slope, inter)
 	# plot_spr_fit_poly('springData.txt')
 	
-	tryFits('launcherData.txt')
+	# tryFits('launcherData.txt')
+	
+	getSpeed('launcherData.txt')
