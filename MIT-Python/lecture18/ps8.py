@@ -108,21 +108,28 @@ class ResistantVirus(SimpleVirus):
 
         counter = 0 
         for drug in activeDrugs:
-            if drug not in self.resistances.keys(): break
-            if not(self.resistances[drug]): break
+            if drug not in self.resistances.keys(): continue
+            if not(self.resistances[drug]): continue
             counter += 1
 
-        if counter == len(activeDrugs): raise NoChildException()
+        ran_p = random.random()
+        p = self.maxBirthProb * ( 1- popDensity)
+         
+        if (ran_p > p) or (counter != len(activeDrugs)): raise NoChildException()
+
         else: 
-            ran_p = random.random()
-            p = self.maxBirthProb * ( 1- popDensity)
-            if ran_p <= p: 
-                new_resistances = dict()
+            new_resistances = dict()
+            for k in self.resistances.keys():   
                 temp_p = random.random()
-                '''
-                need to create a new_resistances dict according to the instructions. 
-                '''
-                return ResistantVirus(self.maxBirthProb, self.clearProb, new_resistances, self.mutProb)
+                if (self.resistances[k]):
+                    if temp_p <= 1 - self.mutProb: temp_res = True
+                    else: temp_res = False
+                else: 
+                    if temp_p <= self.mutProb: temp_res = True
+                    else: temp_res = False
+                new_resistances[k] = temp_res
+
+            return ResistantVirus(self.maxBirthProb, self.clearProb, new_resistances, self.mutProb)
             
 
 class Patient(SimplePatient):
