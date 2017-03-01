@@ -151,10 +151,11 @@ class Patient(SimplePatient):
         maxPop: the  maximum virus population for this patient (an integer)
         """
         # TODO
-    
+        self.viruses = viruses
+        self.maxPop = maxPop
+        self.postcondition = list()
 
     def addPrescription(self, newDrug):
-
         """
         Administer a drug to this patient. After a prescription is added, the 
         drug acts on the virus population for all subsequent time steps. If the
@@ -166,7 +167,11 @@ class Patient(SimplePatient):
         """
         # TODO
         # should not allow one drug being added to the list multiple times
+        
+        if newDrug not in self.postcondition: 
+            self.postcondition.append(newDrug)
 
+        return self.postcondition
 
     def getPrescriptions(self):
 
