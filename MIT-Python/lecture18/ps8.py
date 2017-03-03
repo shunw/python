@@ -9,7 +9,8 @@
 import numpy
 import random
 import pylab
-from ps7 import *
+import matplotlib.pyplot as plt
+# from ps7 import *
 
 #
 # PREVIOUS ONE
@@ -413,9 +414,37 @@ def simulationWithDrug():
 
     maxBirthProb = .1
     clearProb = .05
-    resistances = {guttagonol: False}
+    resistances = {'guttagonol': False}
     mutProb = .005
 
+    ResistantVirus_list = list()
+    for n in range(viruses_qty):
+        ResistantVirus_list.append(ResistantVirus(maxBirthProb, clearProb, resistances, mutProb))
+    
+    time_step = 150
+    t_step = range(time_step)
+    
+    vir_qty = list()
+    patient_1 = Patient(ResistantVirus_list, maxPop)
+    for t in range(time_step):
+        vir_qty.append(patient_1.update())
+    
+    vir_qty_drug = list()
+    patient_1.addPrescription('guttagonol')
+    for t in range(time_step):
+        vir_qty_drug.append(patient_1.update())
+
+    plt.title('Virus Qty versus Time Step')
+    plt.xlabel('Time Step')
+    plt.ylabel('Viruses Qty')
+    plt.plot(t_step, vir_qty, label = 'viruses qty trend w/o drug')
+    plt.plot(t_step, vir_qty_drug, label = 'viruses qyt trend w/ drug')
+    plt.legend(loc = 'best')
+    plt.show()
+
+        
+if __name__ == '__main__': 
+    simulationWithDrug()
 
 #
 # PROBLEM 3
