@@ -6,7 +6,7 @@ import sqlite3
 import csv
 
 def write_output(col_name, data):
-	f = open('output.csv', 'w')
+	f = open('conan_main.csv', 'w')
 	data_write = list()
 	for line in data: 
 		data_write.append(line)
