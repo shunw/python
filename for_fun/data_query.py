@@ -39,8 +39,8 @@ output = c.execute('''
 
 col_name = ['iqiyi_num', 'name', 'qty', 'iqiyi_type', 'event_type', 'root_cause', 'key_person', 'key_story', 'comment']
 
-for i in output:
-	print (i)
+# for i in output:
+# 	print (i)
 
 write_output(col_name, output)
 

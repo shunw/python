@@ -63,11 +63,25 @@ def reorder(L):
         if e < L[0]:
             L[0] = e
 
-L = [Square(6), Rectangle(2, 3), Circle(1)]
-try:
-    reorder(L)
-    for e in L:
-        print e
-except:
-    for e in L:
-        print e
+# L = [Square(6), Rectangle(2, 3), Circle(1)]
+# try:
+#     reorder(L)
+#     for e in L:
+#         print e
+# except:
+#     for e in L:
+#         print e
+
+
+tots = [0.00]*3
+maxVals = [0.0]*3
+mean = 100.0
+stdDevs = [0.0, 20.0, 40.0]
+for i in range(1000):
+
+    for j in range(len(tots)):
+        next = random.gauss(mean, stdDevs[j])
+        tots[j] += next
+        if next > maxVals[j]:
+            maxVals[j] = next
+print tots
