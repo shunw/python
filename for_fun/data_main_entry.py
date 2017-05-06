@@ -80,10 +80,10 @@ if __name__ == '__main__':
 
 
 	conan_op = cur_operation(cur)
-	# conan_op.helpTB_insert({'key_person': ['世良真纯']})
+	conan_op.helpTB_insert({'key_person': ['水无怜奈／本堂瑛海／基尔']})
 	conan_op.mainTB_insert(data)
-	# , [502, '黑暗组织之影 小小目击者／奇妙的照明／神秘高额报酬／珍珠流星', 4, '电视版', '杀人', '复仇', '本堂瑛佑', '黑衣人', '水无怜奈／本堂瑛海／基尔' ]
- 
+	data = [[502, '黑暗组织之影 小小目击者／奇妙的照明／神秘高额报酬／珍珠流星', 4, '电视版', '杀人', '复仇', '本堂瑛佑', '黑衣人', '柯南怀疑本堂瑛佑出现的主要目的是打听水无怜奈的消息，且通过珍珠流星一集，应该通过小朋友这里打听到了事故的经过'], [538, '红与黑的撞击 开端／血缘／惨叫／冥土／昏睡', ？, '电视版', '诈骗／杀人', '复仇', '本堂瑛佑', '黑衣人', '']]
+	# sample = [No_of_iqiyi, name_of_story, qty_of_story, iqiyi_type = '电视篇', event_type = '杀人', root_cause = '复仇', key_person = '本堂瑛佑', key_story = '黑衣人', comment = xxx]
 	# cur.execute('SELECT * from conan_main where iqiyi_num = 350')
 	# print (cur.fetchall())
 		
