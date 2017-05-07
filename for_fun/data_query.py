@@ -16,9 +16,10 @@ def write_output(col_name, data, fl_name):
 	
 class conan_db:
 	def __init__(self):
-		self.conn = sqlite3.connect('conan_info.db')
+		self.conn = None
 
 	def conan_main_query(self):
+		self.conn = sqlite3.connect('conan_info.db')
 		c = self.conn.cursor()
 		output = c.execute('''
 			select conan_main.iqiyi_num, conan_main.name, conan_main.qty
@@ -39,11 +40,12 @@ class conan_db:
 		col_name = ['iqiyi_num', 'name', 'qty', 'iqiyi_type', 'event_type', 'root_cause', 'key_person', 'key_story', 'comment']
 		
 		write_output(col_name, output, 'conan_main.csv')
-		c.execute('select * from conan_main where iqiyi_num = 226 or iqiyi_num = 110')
-		print (c.fetchall())
+		# c.execute('select * from conan_main where iqiyi_num = 226 or iqiyi_num = 110')
+		# print (c.fetchall())
 		self.conn.close()
 	
 	def help_db_query(self, tb_name):
+		self.conn = sqlite3.connect('conan_info.db')
 		c = self.conn.cursor()
 		output = c.execute('select * from {tb_name}'.format(tb_name = tb_name))
 		col_name = [desp[0] for desp in c.description]
@@ -59,4 +61,7 @@ if __name__ == '__main__':
 	help_table_name: 
 	iqiyi_type; event_type; root_cause; key_person; key_story
 	'''
+	# q.help_db_query('event_type')
+	# q.help_db_query('root_cause')
 	# q.help_db_query('key_person')
+	# q.help_db_query('key_story')
