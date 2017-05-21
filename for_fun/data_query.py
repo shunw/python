@@ -61,7 +61,7 @@ if __name__ == '__main__':
 	help_table_name: 
 	iqiyi_type; event_type; root_cause; key_person; key_story
 	'''
-	# q.help_db_query('event_type')
-	# q.help_db_query('root_cause')
-	# q.help_db_query('key_person')
-	# q.help_db_query('key_story')
+	q.help_db_query('event_type')
+	q.help_db_query('root_cause')
+	q.help_db_query('key_person')
+	q.help_db_query('key_story')
