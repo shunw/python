@@ -31,10 +31,42 @@ def spades_high(card):
     # return rank_value * len(suit_values) + suit_values[card.suit]
     return rank_value + suit_values[card.suit] * (len(FrenchDeck.ranks) + 1)
 
-if __name__ == '__main__':
-    deck = FrenchDeck()
-    for card in sorted(deck, key = spades_high, reverse = True):
-        print (card)
-    # for i in deck:
-    #     print (i)
+'''
+Vector basic 
+--- need function between vectors: add/ abs
+'''
+
+class Vector(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
     
+    def __repr__(self):
+        return 'Vector({x}, {y})'.format(x = self.x, y = self.y)
+
+    def __abs__(self):
+        return (self.x ** 2 + self.y ** 2) ** .5
+    
+    def __bool__(self):
+        pass
+    
+    def __add__(self, other):
+        pass
+    
+    def __mul__(self, other):
+        # return 'Vector({x}, {y})'.format(x = self.x * other, y = self.y * other)
+        self.x = self.x * other
+        self.y = self.y * other
+        return self.x, self.y
+
+if __name__ == '__main__':
+    # # for the Frech Deck
+    # deck = FrenchDeck()
+    # for card in sorted(deck, key = spades_high, reverse = True):
+    #     print (card)
+    
+    # for Vector
+    v1 = Vector(3, 4)
+    v2 = Vector(2, 1)
+    # print (v1 + v2)
+    print (abs(v1 * 3))
