@@ -49,6 +49,7 @@ class Vector(object):
     def __bool__(self):
         # not sure what is this for. 
         return bool(abs(self))
+        
     
     def __add__(self, other):
         self.x += other.x
@@ -71,7 +72,13 @@ if __name__ == '__main__':
     #     print (card)
     
     # for Vector
-    v1 = Vector(3, 4)
+    v1 = Vector(1, 0)
     v2 = Vector(2, 1)
     # print (v1 + v2)
-    print (abs(v1 * 3))
+    # print (len(v1))
+    print (bool(v1) is True)
+    print (v1 == True)
+    if v1:
+        print (1)
+    else: 
+        print (2)
