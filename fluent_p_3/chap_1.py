@@ -1,5 +1,6 @@
 import collections
 from random import choice
+from math import hypot
 
 Card = collections.namedtuple('Card', ['rank', 'suit'])
 
@@ -41,23 +42,27 @@ class Vector(object):
         self.x = x
         self.y = y
     
+    def __abs__(self):
+        # return (self.x ** 2 + self.y ** 2) ** .5
+        return hypot(self.x, self.y)
+    
+    def __bool__(self):
+        # not sure what is this for. 
+        return bool(abs(self))
+    
+    def __add__(self, other):
+        self.x += other.x
+        self.y += other.y
+        return Vector(self.x, self.y)
+        
     def __repr__(self):
         return 'Vector({x}, {y})'.format(x = self.x, y = self.y)
 
-    def __abs__(self):
-        return (self.x ** 2 + self.y ** 2) ** .5
-    
-    def __bool__(self):
-        pass
-    
-    def __add__(self, other):
-        pass
-    
-    def __mul__(self, other):
+    def __mul__(self, scalar):
         # return 'Vector({x}, {y})'.format(x = self.x * other, y = self.y * other)
-        self.x = self.x * other
-        self.y = self.y * other
-        return self.x, self.y
+        self.x = self.x * scalar
+        self.y = self.y * scalar
+        return Vector(self.x, self.y)
 
 if __name__ == '__main__':
     # # for the Frech Deck
