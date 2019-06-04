@@ -49,9 +49,37 @@ metro_areas = [
     ('Sao Paulo', 'BR', 19.649, (-23.547778, -46.635833)),
 ]
 
-# print('{:15} | {:^9} | {:^9}'.format('', 'lat.', 'long.')) 
-print('{:15}|{:^9}|{:^9}'.format('', 'lat.', 'long.')) 
-fmt = '{:15}|{:9.4f}|{:9.4f}'
-for name, cc, pop, (latitude, longitude) in metro_areas:
-    if longitude <= 0: 
-        print(fmt.format(name, latitude, longitude))
+
+# print('{:15}|{:^9}|{:^9}'.format('', 'lat.', 'long.')) 
+# fmt = '{:15}|{:9.4f}|{:9.4f}'
+# for name, cc, pop, (latitude, longitude) in metro_areas:
+#     if longitude <= 0: 
+#         print(fmt.format(name, latitude, longitude))
+
+
+'''
+Named Tuples
+'''
+from collections import namedtuple
+
+City = namedtuple('city_1', 'name country population coordinates')
+tokyo = City('Tokyo', 'JP', 36.933, (35.689722, 139.691667))
+shanghai = City('Shanghai', 'CN', 123, (135, 246))
+
+# print (City._fields)
+LatLong = namedtuple('LatLong', 'lat long')
+delhi_data = ('Delhi NCR', 'IN', 21.935, LatLong(28.613889, 77.208889))
+delhi = City._make(delhi_data) # same as City(*delhi_data)
+# for k, v in delhi._asdict().items():
+#     print (k, ':', v)
+
+a = [1, 3, 5, 7, 9]
+b = [2, 10, 10, 8, 10]
+
+a.extend(b)
+
+a_t = (1, 3, 5, 7, 9)
+b_t = (2, 4, 6, 8, 10)
+a.append(b_t)
+# print (a)
+print (a)
