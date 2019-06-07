@@ -73,13 +73,39 @@ delhi = City._make(delhi_data) # same as City(*delhi_data)
 # for k, v in delhi._asdict().items():
 #     print (k, ':', v)
 
-a = [1, 3, 5, 7, 9]
+a = [1, 5, 3, 7, 9]
 b = [2, 10, 10, 8, 10]
 
-a.extend(b)
+# a.extend(b)
 
 a_t = (1, 3, 5, 7, 9)
 b_t = (2, 4, 6, 8, 10)
-a.append(b_t)
+# a.append(b_t)
 # print (a)
-print (a)
+# b.insert(0, 10)
+# a.pop([1])
+a.sort(reverse = True)
+
+my_list =[[1, 2, 3]] 
+# print (my_list * 3)
+
+'''
+Using + and * with Sequences
+'''
+
+board = [['_'] * 3 for i in range(3)]
+# board = [['_'] * 3] * 3
+board[1][2] = 'X'
+
+# row = ['_'] * 3
+# board = list()
+# for i in range(3): 
+#     board.append(row)
+
+board = []
+for i in range(3): 
+    row = ['_'] * 3
+    board.append(row)
+    
+board[1][2] = 'X'
+print (board)
