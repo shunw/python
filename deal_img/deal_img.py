@@ -10,6 +10,8 @@ class photo_deal(object):
         self.fl_name = fl_name
         self.face_top = face_top
         self.face_bottom = face_bottom
+        self.black_rgb = [0, 0, 0]
+        self.white_rgb = [255, 255, 255]
         
         
     def crop_2_tw(self, dpi = 300):
@@ -59,11 +61,62 @@ class photo_deal(object):
         ext = self.fl_name.split('.')[1]
         mpimg.imsave(('.').join((f_new, ext)), img_new, dpi = dpi)
 
+    def _mask_deal(self, mask_points_nparray): 
+        '''
+        to make the image masked by the points found
+        current np array is row == actual_row, col == 2
+        '''
+        # print (mask_points_nparray)
+        for i in range(mask_points_nparray.shape[0]): 
+            if mask_points_nparray[i, 0] == mask_points_nparray[i, 1]: 
+                self.img[i, :] = self.black_rgb
+            else: 
+                print (mask_points_nparray[0, 0])
+                self.img[i, :mask_points_nparray[i, 0]] = self.black_rgb
+                self.img[i, mask_points_nparray[i, 0]:mask_points_nparray[1]] = self.white_rgb
+                self.img[i, mask_points_nparray[i, 1]: ] = self.black_rgb
+        
+    def change_bg_id_white(self):
+        '''
+        idea is to find all the same color area, like the white background. 
+        '''
+        self.img = mpimg.imread(self.fl_name)
+        
+        self.actual_row, self.actual_col, self.actual_channels = self.img.shape
+        
+        '''
+        basic idea is to: 
+        1. scan each line, and find the min and max position, which is not white bg
+        2. change the bg color and show in the image. 
+        '''
+        
+        max_min = np.zeros((self.actual_row, 2))
+        for i in range(self.actual_row): 
+            for j in range(self.actual_col): 
+                if self.img[i, j].all == self.white_rgb:
+                    continue
+                else: 
+                    if max_min[i, 0] == 0 and max_min[i, 1] == 0: 
+                        max_min[i, 0] = j
+                    elif max_min[i, 1] == 0:
+                        max_min[i, 1] = j
+                    elif max_min[i, 1] < j:
+                        max_min[i, 1] = j
+        
+        self._mask_deal(max_min)
+        plt.imshow(self.img)
+        plt.show()
+        
+
+
     def change_bg_id_photo(self):
         '''
         reference to link: 
         https://blog.csdn.net/haofan_/article/details/76618362
         https://blog.csdn.net/taily_duan/article/details/51506776
+
+        this is to find the suitable data for upper / lower data, but not suitable for white background. 
+        https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_colorspaces/py_colorspaces.html
         '''
         self.img = cv2.imread(self.fl_name)
         self.actual_len, self.actual_width, self.actual_channels = self.img.shape
@@ -111,7 +164,7 @@ if __name__ == '__main__':
     # photo_crop.crop_2_tw(300)
 
     change_bg = photo_deal(f_name)
-    change_bg.change_bg_id_photo()
+    change_bg.change_bg_id_white()
 
 
         
