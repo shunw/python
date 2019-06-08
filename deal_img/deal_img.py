@@ -72,8 +72,23 @@ class photo_deal(object):
         lower_blue = np.array([0, 0, 221])
         upper_blue = np.array([180, 20, 255])
         
+        '''
+        here is to check how to use the normal way to get the white background range
+        '''
+        # lower_blue = np.array([0, 100, 220])
+        # upper_blue = np.array([10, 255, 255])
         
+
+        # print (hsv[0][0], hsv.shape)
+        # print (self.img[0][0], self.img)
+        # white = np.uint8([[[255, 255, 255]]])
+        # hsv_white = cv2.cvtColor(white, cv2.COLOR_BGR2HSV)
+        # print (hsv_white)
+        '''
+        end
+        '''
         mask = cv2.inRange(hsv, lower_blue, upper_blue)
+        # cv2.imshow('res', mask)
         
         erode = cv2.erode(mask, None, iterations = 1)
 
