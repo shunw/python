@@ -12,6 +12,7 @@ class photo_deal(object):
         self.face_bottom = face_bottom
         self.black_rgb = [0, 0, 0]
         self.white_rgb = [255, 255, 255]
+        self.grey_rgb = [192, 193, 196]
         
         
     def crop_2_tw(self, dpi = 300):
@@ -61,20 +62,29 @@ class photo_deal(object):
         ext = self.fl_name.split('.')[1]
         mpimg.imsave(('.').join((f_new, ext)), img_new, dpi = dpi)
 
-    def _mask_deal(self, mask_points_nparray): 
+    def _mask_deal(self, mask_points_nparray, masked_color = 'original', unmasked_color = 'black'): 
         '''
         to make the image masked by the points found
         current np array is row == actual_row, col == 2
+
+        masked_color (original/ white/ other color RGB; str(original) or rgb list): make the face masked, which will not be changed after the deal
+        unmasked_color: unmasked part will be changed later, like background
         '''
+        if unmasked_color == 'black': 
+            unmasked_color = self.black_rgb
+        else: 
+            unmasked_color = unmasked_color
+
         # print (mask_points_nparray)
         for i in range(mask_points_nparray.shape[0]): 
             if mask_points_nparray[i, 0] == mask_points_nparray[i, 1]: 
-                self.img[i, :] = self.black_rgb
+                self.img[i, :] = unmasked_color
             else: 
-                print (mask_points_nparray[0, 0])
-                self.img[i, :mask_points_nparray[i, 0]] = self.black_rgb
-                self.img[i, mask_points_nparray[i, 0]:mask_points_nparray[1]] = self.white_rgb
-                self.img[i, mask_points_nparray[i, 1]: ] = self.black_rgb
+                # print (mask_points_nparray[i, 0])
+                self.img[i, :int(mask_points_nparray[i, 0])] = unmasked_color
+                if masked_color != 'original': 
+                    self.img[i, int(mask_points_nparray[i, 0]):int(mask_points_nparray[i, 1])] = masked_color
+                self.img[i, int(mask_points_nparray[i, 1]): ] = unmasked_color
         
     def change_bg_id_white(self):
         '''
@@ -93,7 +103,7 @@ class photo_deal(object):
         max_min = np.zeros((self.actual_row, 2))
         for i in range(self.actual_row): 
             for j in range(self.actual_col): 
-                if self.img[i, j].all == self.white_rgb:
+                if set(self.img[i, j]) == set(self.white_rgb):
                     continue
                 else: 
                     if max_min[i, 0] == 0 and max_min[i, 1] == 0: 
@@ -102,8 +112,10 @@ class photo_deal(object):
                         max_min[i, 1] = j
                     elif max_min[i, 1] < j:
                         max_min[i, 1] = j
+        # print (max_min[0, 0], max_min[0, 1])
         
-        self._mask_deal(max_min)
+        # self._mask_deal(max_min)
+        self._mask_deal(max_min, masked_color = 'original', unmasked_color = self.grey_rgb)
         plt.imshow(self.img)
         plt.show()
         
@@ -122,8 +134,10 @@ class photo_deal(object):
         self.actual_len, self.actual_width, self.actual_channels = self.img.shape
 
         hsv = cv2.cvtColor(self.img, cv2.COLOR_BGR2HSV)
-        lower_blue = np.array([0, 0, 221])
-        upper_blue = np.array([180, 20, 255])
+        # lower_blue = np.array([0, 0, 221])
+        # upper_blue = np.array([180, 20, 255])
+        lower_blue = np.array([0, 0, 225])
+        upper_blue = np.array([200, 20, 255])
         
         '''
         here is to check how to use the normal way to get the white background range
