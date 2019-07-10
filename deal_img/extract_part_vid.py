@@ -42,11 +42,11 @@ class Vid_deal(object):
         self.fcount = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
         self.v_width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.v_height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-        self.cp_start_r = cp_frm[0][1]
-        self.cp_end_r = cp_frm[1][1]
-        self.cp_start_c = cp_frm[0][0]
-        self.cp_end_c = cp_frm[1][0]
+        self.cp_frm = cp_p_inf
+        self.cp_start_r = self.cp_frm[0][1]
+        self.cp_end_r = self.cp_frm[1][1]
+        self.cp_start_c = self.cp_frm[0][0]
+        self.cp_end_c = self.cp_frm[1][0]
 
         self.start_print_frm = start_print_frm
         try:
@@ -103,7 +103,7 @@ class Vid_deal(object):
 if __name__ == '__main__':
     start_time = time.time()
     
-    fl_name = 'G.wmv'
+    fl_name = '119.mp4'
     
     # # this is to get the cooling down time. 
     vid_1 = Vid_deal(fl_name)
