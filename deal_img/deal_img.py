@@ -4,6 +4,8 @@ import numpy as np
 import scipy.misc
 import os
 import cv2
+from PIL import Image 
+from functools import reduce
 
 class photo_deal(object): 
     def __init__(self, fl_name, face_top = None, face_bottom = None): 
@@ -168,17 +170,47 @@ class photo_deal(object):
         cv2.imshow('res', self.img)
         cv2.waitKey(0)
         
+import operator
+
+def equalize(im):
+    
+    h = im.convert("L").histogram()
+    lut = []
+    for b in range(0, len(h), 256):
+        # step size
+        step = reduce(operator.add, h[b:b+256]) / 255
+        # create equalization lookup table
+        n = 0
+        for i in range(256):
+            lut.append(n / step)
+            n = n + h[i+b]
+    # map image through lookup table
+    # print (im.layers)
+    # return im.point(lut*im.layers)
+    return im.point(lut*4)
 
 if __name__ == '__main__':
-    f_name = 'vivian.JPG'
+    f_name = 'mhz.png'
+    # f_name = 'vivian.jpg'
+    f_name2 = 'mhz2.png'
     
     # f_top = 50
     # f_bottom = 479
     # photo_crop = photo_deal(f_name, f_top, f_bottom)
     # photo_crop.crop_2_tw(300)
 
-    change_bg = photo_deal(f_name)
-    change_bg.change_bg_id_white()
+    # change_bg = photo_deal(f_name)
+    # change_bg.change_bg_id_white()
+    im_file1 = Image.open(f_name)
+    test1 = equalize(im_file1)
+    # Image.open(test)
+
+    im_file2 = Image.open(f_name2)
+    test2 = equalize(im_file2)
+
+    test1.show()
+    test2.show()
+    
 
 
         
