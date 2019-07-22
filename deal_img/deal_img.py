@@ -211,6 +211,17 @@ if __name__ == '__main__':
     test1.show()
     test2.show()
     
+    '''
+    this could make the image just in black and white with frames
+    '''
+    # https://stackoverflow.com/questions/10561222/how-do-i-equalize-contrast-brightness-of-images-using-opencv
+    img = cv2.imread(fl_name,0)
+    kernel1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
+    close = cv2.morphologyEx(img,cv2.MORPH_CLOSE,kernel1)
+    div = np.float32(img)/(close)
+    res = np.uint8(cv2.normalize(div,div,0,255,cv2.NORM_MINMAX))
+    cv2.imshow('res', res)
+    cv2.waitKey(0)
 
 
         
