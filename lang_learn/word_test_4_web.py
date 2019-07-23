@@ -11,28 +11,63 @@ import pandas as pd
 class Prepare_web_jpwords(object): 
     def __init__(self): 
         self.word_files = []
+
+        self.col_name_les = 'lesson_no'
+        self.col_name_itemno = '番号'
+        self.col_name_word = '単語'
+        self.col_name_chn = '漢字'
+        self.col_name_mean = '意味'
     
     def get_all_files(self): 
         for (_, _, filenames) in os.walk('.'):
             for i in filenames: 
-                if re.match('data-j[0-9]*.*txt', i):
+                if re.match('data-j[0-9]+.*txt', i):
                     self.word_files.append(i)
             break
 
     def word_df_setup(self): 
+        cnt = 0
         for f in self.word_files:
-            pass
+            lesson_no = re.findall('[0-9]+', f)
+            
+            if cnt == 0: 
+                self.all_word_df = pd.read_csv(f, sep="\s+", header=0)
+                self.all_word_df[self.col_name_les] = lesson_no * self.all_word_df.shape[0]
+                cnt += 1
+            
+            else: 
+                # print (f)
+                temp_df = pd.read_csv(f, sep="\s+", header=0)
+                temp_df[self.col_name_les] = lesson_no * temp_df.shape[0]
+                self.all_word_df = self.all_word_df.append(temp_df)
+                cnt += 1
+            # if cnt == 2: 
+            #     break
+        # print (self.all_word_df.tail())
+        self.all_word_df = self.all_word_df.reset_index(drop = True)
+
+    def refine_dataframe(self): 
+        '''
+        1. reset the index number
+        
+        future func: 
+            add weight during the shuffle
+        '''
+        pass
 
     def final_run(self): 
         self.get_all_files()
         self.word_df_setup()
+        print (self.all_word_df.tail())
 
 if __name__ == '__main__': 
-    # jp_word = Prepare_web_jpwords()
-    # jp_word.final_run()
-    data = pd.read_csv('data-j6.txt', sep="\s+", header=None)
-    data.columns = ["a", "b", "c", "etc.", 'aga']
-    print (data['etc.'])
-    
+    jp_word = Prepare_web_jpwords()
+    jp_word.final_run()
+    # data = pd.read_csv('data-j6.txt', sep="\s+", header=0)
+    # data.columns = ["item#", "word", "chinese_form", "mean", '1st_item']
+    # a = 'data-j36.txt'
+    # b = re.findall('[0-9]+', a)
+    # print (b * 3)
+    # print (data.head())
     
     
