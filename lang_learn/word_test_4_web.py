@@ -11,6 +11,8 @@ import pandas as pd
 class Prepare_web_jpwords(object): 
     def __init__(self): 
         self.word_files = []
+        self.word_df_name = 'all_word.pkl'
+        self.ready_2_web_name = 'ready_2_web.txt'
 
         self.col_name_les = 'lesson_no'
         self.col_name_itemno = '番号'
@@ -26,6 +28,11 @@ class Prepare_web_jpwords(object):
             break
 
     def word_df_setup(self): 
+        '''
+        1. get all the words
+        2. reset the index number
+        3. write into one pkl dataframe
+        '''
         cnt = 0
         for f in self.word_files:
             lesson_no = re.findall('[0-9]+', f)
@@ -45,29 +52,56 @@ class Prepare_web_jpwords(object):
             #     break
         # print (self.all_word_df.tail())
         self.all_word_df = self.all_word_df.reset_index(drop = True)
+        self.all_word_df.to_pickle(self.word_df_name)
 
-    def refine_dataframe(self): 
+    def refine_dataframe(self, get_n_words = 10): 
         '''
-        1. reset the index number
+        read pkl data
+        shuffle the data
         
         future func: 
             add weight during the shuffle
+        
+        write to web format in txt type
         '''
-        pass
+        self.all_word_prepare = pd.read_pickle(self.word_df_name)
+        self.all_word_prepare = self.all_word_prepare.sample(frac = 1, random_state = 1)
+
+        word_web = open(self.ready_2_web_name,"w") 
+
+        for i in range(get_n_words): 
+            # Program to show various ways to read and 
+            # write data in a file. 
+            
+            mean = self.all_word_prepare[self.col_name_mean].iloc[i]
+            word = '{w} / {ch} ({les_no}-{wor_no})'.format(w = self.all_word_prepare[self.col_name_word].iloc[i], ch = self.all_word_prepare[self.col_name_chn].iloc[i], les_no = self.all_word_prepare[self.col_name_les].iloc[i], wor_no = self.all_word_prepare[self.col_name_itemno].iloc[i])
+            L = ["- {mean}\n    - {word}\n".format(mean = mean, word = word)]  
+            
+            # \n is placed to indicate EOL (End of Line) 
+            word_web.writelines(L) 
+        
+        word_web.close() #to change file access modes 
+
+
 
     def final_run(self): 
         self.get_all_files()
-        self.word_df_setup()
-        print (self.all_word_df.tail())
+        # self.word_df_setup()
+        # print (self.all_word_df.tail())
+        self.refine_dataframe()
+        # print (self.all_word_prepare.head())
 
 if __name__ == '__main__': 
     jp_word = Prepare_web_jpwords()
     jp_word.final_run()
+    
     # data = pd.read_csv('data-j6.txt', sep="\s+", header=0)
     # data.columns = ["item#", "word", "chinese_form", "mean", '1st_item']
     # a = 'data-j36.txt'
     # b = re.findall('[0-9]+', a)
     # print (b * 3)
     # print (data.head())
+
+    
     
     
