@@ -127,12 +127,10 @@ if __name__ == '__main__':
     jp_word = Prepare_web_jpwords()
     jp_word.final_run()
     
-    # data = pd.read_csv('data-j6.txt', sep="\s+", header=0)
-    # data.columns = ["item#", "word", "chinese_form", "mean", '1st_item']
-    # a = 'data-j36.txt'
-    # b = re.findall('[0-9]+', a)
-    # print (b * 3)
-    # print (data.head())
+    '''
+    next time please save to the same format and the title which will be used on the web
+    
+    '''
 
     
     
