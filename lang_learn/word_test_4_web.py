@@ -12,7 +12,7 @@ class Prepare_web_jpwords(object):
     def __init__(self): 
         self.word_files = []
         self.word_df_name = 'all_word.pkl'
-        self.ready_2_web_name = 'ready_2_web.txt'
+        self.ready_2_web_name_part = 'ready_2_web'
 
         self.col_name_les = 'lesson_no'
         self.col_name_itemno = '番号'
@@ -54,7 +54,7 @@ class Prepare_web_jpwords(object):
         self.all_word_df = self.all_word_df.reset_index(drop = True)
         self.all_word_df.to_pickle(self.word_df_name)
 
-    def refine_dataframe(self, get_n_words = 70): 
+    def refine_dataframe(self, word_interval = 70): 
         '''
         read pkl data
         shuffle the data
@@ -67,21 +67,53 @@ class Prepare_web_jpwords(object):
         self.all_word_prepare = pd.read_pickle(self.word_df_name)
         self.all_word_prepare = self.all_word_prepare.sample(frac = 1, random_state = 1)
 
-        word_web = open(self.ready_2_web_name,"w") 
-
-        for i in range(get_n_words): 
-            # Program to show various ways to read and 
-            # write data in a file. 
-            
-            mean = self.all_word_prepare[self.col_name_mean].iloc[i]
-            word = '{w} / {ch} ({les_no}-{wor_no})'.format(w = self.all_word_prepare[self.col_name_word].iloc[i], ch = self.all_word_prepare[self.col_name_chn].iloc[i], les_no = self.all_word_prepare[self.col_name_les].iloc[i], wor_no = self.all_word_prepare[self.col_name_itemno].iloc[i])
-            L = ["- {mean}\n\n    - {word}\n\n".format(mean = mean, word = word)]  
-            
-            # \n is placed to indicate EOL (End of Line) 
-            word_web.writelines(L) 
+        total_num = self.all_word_prepare.shape[0]
+        file_num = total_num // word_interval
         
-        word_web.close() #to change file access modes 
+        for file_ind in range(file_num): 
 
+            output_name = '{part}_{count}.txt'.format(part = self.ready_2_web_name_part, count = file_ind)
+
+
+            word_web = open(output_name,"w") 
+
+            for i in range(word_interval): 
+                # Program to show various ways to read and 
+                # write data in a file. 
+                w_row = i + file_ind * word_interval
+
+                mean = self.all_word_prepare[self.col_name_mean].iloc[w_row]
+                word = '{w} / {ch} ({les_no}-{wor_no})'.format(w = self.all_word_prepare[self.col_name_word].iloc[w_row], ch = self.all_word_prepare[self.col_name_chn].iloc[w_row], les_no = self.all_word_prepare[self.col_name_les].iloc[w_row], wor_no = self.all_word_prepare[self.col_name_itemno].iloc[w_row])
+                L = ["- {mean}\n\n    - {word}\n\n".format(mean = mean, word = word)]  
+                
+                # \n is placed to indicate EOL (End of Line) 
+                word_web.writelines(L) 
+            
+            word_web.close() #to change file access modes 
+        
+        w_row += 1
+
+        if w_row < total_num - 1: 
+
+            output_name = '{part}_{count}.txt'.format(part = self.ready_2_web_name_part, count = file_num)
+
+            word_web = open(output_name,"w") 
+
+            for i in range(w_row, total_num): 
+                # Program to show various ways to read and 
+                # write data in a file. 
+                
+                w_row = i 
+
+                mean = self.all_word_prepare[self.col_name_mean].iloc[w_row]
+                word = '{w} / {ch} ({les_no}-{wor_no})'.format(w = self.all_word_prepare[self.col_name_word].iloc[w_row], ch = self.all_word_prepare[self.col_name_chn].iloc[w_row], les_no = self.all_word_prepare[self.col_name_les].iloc[w_row], wor_no = self.all_word_prepare[self.col_name_itemno].iloc[w_row])
+                
+                L = ["- {mean}\n\n    - {word}\n\n".format(mean = mean, word = word)]  
+                
+                # \n is placed to indicate EOL (End of Line) 
+                word_web.writelines(L) 
+                
+            word_web.close() #to change file access modes 
 
 
     def final_run(self): 
