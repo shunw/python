@@ -112,6 +112,7 @@ class Mnist_Logistic(nn.Module):
         out = self.layer2_2(out)
         return out
 
+
 class Image_torch_train(object): 
     def __init__(self, img_dir): 
         '''
@@ -121,7 +122,7 @@ class Image_torch_train(object):
         # self.y_train = y_train  
 
         # # self.x_train_normal = (self.x_train - self.x_train.min()) *1.0 / (self.x_train.max() - self.x_train.min())    
-        simple_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize([.485, .456, .406], [.229, .224, .225])]) # , transforms.Normalize([.485, .456, .406], [.229, .224, .225])
+        simple_transform = transforms.Compose([transforms.RandomHorizontalFlip(), transforms.RandomRotation(.2), transforms.ToTensor(), transforms.Normalize([.485, .456, .406], [.229, .224, .225])]) 
         # self.x_train_normal = self.x_train(transform = simple_transfer)
         # # self.x_train_normal = self.x_train_normal.float()
         # self.y_train = self.y_train.type(torch.LongTensor)  
@@ -130,8 +131,8 @@ class Image_torch_train(object):
         self.train = datasets.ImageFolder(os.path.join(self.img_dir, 'train'), simple_transform)
         self.valid = datasets.ImageFolder(os.path.join(self.img_dir, 'valid'), simple_transform)
 
-        self.train_data_gen = torch.utils.data.DataLoader(self.train, batch_size = 4, num_workers = 3)
-        self.valid_data_gen = torch.utils.data.DataLoader(self.valid, batch_size = 4, num_workers = 3)
+        self.train_data_gen = torch.utils.data.DataLoader(self.train, batch_size = 1, num_workers = 3)
+        self.valid_data_gen = torch.utils.data.DataLoader(self.valid, batch_size = 1, num_workers = 3)
         
         self.loss_func = F.cross_entropy
         # self.n, self.c = self.x_train.shape
@@ -175,8 +176,8 @@ class Image_torch_train(object):
                 self.opt.zero_grad()
 
     def train_model(self): 
-        model = models.resnet18(pretrained = True)
-        num_ftrs = model.fc_in_features
+        model = models.resnet18(pretrained = False)
+        num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 3)
 
         learning_rate = .001
@@ -192,8 +193,8 @@ class Image_torch_train(object):
         best_model_wts = model.state_dict()
         best_acc = 0.0
 
-        # for epoch in range(num_epochs): 
-        for epoch in range(1): 
+        for epoch in range(num_epochs): 
+        # for epoch in range(1): 
         
             print ('Epoch{}/{}'.format(epoch, num_epochs - 1))
             print ('-' * 10)
@@ -226,15 +227,15 @@ class Image_torch_train(object):
 
                     # forward
                     outputs = model(inputs)
-                    print ('output.size: ', outputs.size())
-                    print ('label.size: ', labels.size())
+                    # print ('output.size: ', outputs.size())
+                    # print ('label.size: ', labels.size())
                     _, preds = torch.max(outputs.data, 1)
-                    print ('preds')
-                    print ('-' * 10)
-                    print (preds.size())
-                    print ('labels')
-                    print ('-' * 10)
-                    print (labels)
+                    # print ('preds')
+                    # print ('-' * 10)
+                    # print (preds.size())
+                    # print ('labels')
+                    # print ('-' * 10)
+                    # print (labels)
                     loss = criterion(outputs, labels)
 
                     # backward + optimize only if in training phase
@@ -244,16 +245,16 @@ class Image_torch_train(object):
                     
                     # statistics 
                     # running_loss += loss.data[0]
-                    print ('inner loss: ', loss.data)
-                    print ('inner correct: ', torch.sum(preds == labels.data))
+                    # print ('inner loss: ', loss.data)
+                    # print ('inner correct: ', torch.sum(preds == labels.data))
                     running_loss += loss.item()
                     running_corrects += torch.sum(preds == labels.data)
                 
-                print ('corrects: ', running_corrects)
-                print ('loss: ', running_loss)
-                print ('datasize: ', dataset_sizes[phase])
+                # print ('corrects: ', running_corrects)
+                # print ('loss: ', running_loss)
+                # print ('datasize: ', dataset_sizes[phase])
                 epoch_loss = running_loss/ dataset_sizes[phase]
-                epoch_acc = running_corrects/ dataset_sizes[phase]
+                epoch_acc = running_corrects.float()/ dataset_sizes[phase]
 
                 print ('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
@@ -386,27 +387,27 @@ if __name__ == '__main__':
     start_time = time.time()
     
     
-    img_dir = './data/datasets'
-    # training_data = Training_set_setup(img_dir)
-    # x_train, y_train = training_data.setup_training_set()
+    # img_dir = './data/datasets'
+    # # training_data = Training_set_setup(img_dir)
+    # # x_train, y_train = training_data.setup_training_set()
     
-    img_cost = Image_torch_train(img_dir)
-    # img_cost.get_model()
-    img_cost.train_model()
+    # img_cost = Image_torch_train(img_dir)
+    # # img_cost.get_model()
+    # img_cost.train_model()
     
     # img_cost.img_train()
     # img_cost.fit()
     # img_cost.img_train()
 
     # ------------------------------- TRAIN / VALID FOLDER --------------------------
-    # from_path = './data/train'
-    # to_path = './data/datasets'
-    # unit_name = 'G2079'
-    # cp_pos = [(86, 153), (126, 193)]
-    # setup_folder = Setup_dataset_folder(to_path)
+    from_path = './data/G2079_to_be_copied'
+    to_path = './data/datasets'
+    unit_name = 'G2079'
+    cp_pos = [(86, 153), (126, 193)]
+    setup_folder = Setup_dataset_folder(to_path)
 
-    # # this is to copy the images to the dataset folder
-    # setup_folder.copy_img_2_datasets(from_path, cp_pos, unit_name)
+    # this is to copy the images to the dataset folder
+    setup_folder.copy_img_2_datasets(from_path, cp_pos, unit_name)
 
     # # this is to create train/ valid folder
     # setup_folder.create_train_valid()
