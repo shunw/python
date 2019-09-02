@@ -60,7 +60,7 @@ till chapter 5
 '''
 
 wgt = ih_wgt[0]
-pred = neural_network_sin(input, wgt)
+# pred = neural_network_sin(input, wgt)
 win_or_lose_binary = np.array([1, 1, 0, 1])
 
 '''
@@ -68,11 +68,56 @@ need:
     error? 
     weight - delta weight * alpha
 '''
-error = np.power(pred - win_or_lose_binary, 2)
+# for i in range(3):
+#     pred = neural_network_sin(input, wgt)
+#     error = np.power(pred - win_or_lose_binary, 2)
 
-# print (wgt.shape)
-print (pred - win_or_lose_binary)
-# print (wgt)
-# print (input.dot(pred - win_or_lose_binary))
-wgt -= input.dot(pred - win_or_lose_binary)
-# print (wgt)
+#     # print (wgt.shape)
+#     grad = pred - win_or_lose_binary
+
+#     wgt_delta = input * grad[0]
+
+#     # print (input.dot(pred - win_or_lose_binary))
+#     wgt[1:] = wgt[1:] - (wgt_delta[:, 0] *0.01)[1:]
+#     print ('-' * 10)
+#     print ('Iteration: ' + str(i + 1))
+#     print ('Pred: ' + str(pred))
+#     print ('Error: ' + str(error))
+#     print ('Weight_Delta: ' + str(wgt_delta[:, 0]))
+#     print ('Weights: ' + str(wgt))
+
+
+# till page 90 Gradient descent learning with multiple outputs
+
+mult_weights = [.3, .2, .9]
+mult_weights = np.array(mult_weights)
+mult_weights = mult_weights.reshape(1, 3)
+
+wlrec = np.array([0.65, 1.0, 1.0, 0.9])
+wlrec = wlrec.reshape(4, 1)
+
+hurt = np.array([.1, .0, .0, .1])
+win = np.array([1, 1, 0, 1])
+sad = np.array([.1, .0, .1, .2])
+
+
+true = np.concatenate((hurt.reshape(1, 4), win.reshape(1, 4), sad.reshape(1, 4)), axis=0)
+
+pred = np.dot(wlrec, mult_weights)
+print (pred - np.transpose(true))
+
+
+'''
+notice: 
+1. if weight is [w1, w2, w3], w1 does not change, and w2 and w3 move according to the gradient decent. what would happen. (Page 89)
+    
+    1. if you converged (reached error == 0) with w2 and w3, and then tried to train w1. w1 won't move because error == 0, which means weight_delta == 0
+    
+        -> This reveals a potentially damaging property of neural networks: w1 maybe a powerful input with lots of predictive power, but if the network accidentally figures out how to predict a accurately on the training data without it, then it will never learn to incorporate into its prediction. 
+    
+    2. Also notice how w1 finds the bottom of the bowl. Instead of the black dot moving, the curve seems to move to the left. What does this mean? The black dot can move horzontally only if the weights is updated. Because the weight for w1 is frozen for this experiment, the dot must stay fixed.But error clearly goes to 0. 
+
+    3. This tells you what the graphs really are(three graph, x-axis is weight, y-axis is error). In truth, these are 2D slices of a four-dimensional shape. Three of the dimensions are the weight values, and the fourth dimention is the error. This shape is called the error plane, and, its curvature is determined by the training data. 
+
+    4. error is determined by the training data. Any network can have any weight value, but the value of error given any particular weight configuration is 100% determined by data, You've already seen how the steepness of the U shape is affected by the input data(on several occasions). What you are really trying to do with the neural networks is find the lowest point on this big error plance, where the lowest point refers to the lowest error. 
+'''
