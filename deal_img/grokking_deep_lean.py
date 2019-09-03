@@ -89,8 +89,7 @@ need:
 
 # till page 90 Gradient descent learning with multiple outputs
 
-mult_weights = [.3, .2, .9]
-mult_weights = np.array(mult_weights)
+mult_weights = np.array([.3, .2, .9])
 mult_weights = mult_weights.reshape(1, 3)
 
 wlrec = np.array([0.65, 1.0, 1.0, 0.9])
@@ -102,11 +101,63 @@ sad = np.array([.1, .0, .1, .2])
 
 
 true = np.concatenate((hurt.reshape(1, 4), win.reshape(1, 4), sad.reshape(1, 4)), axis=0)
+true = np.transpose(true)
 
 pred = np.dot(wlrec, mult_weights)
-print (pred - np.transpose(true))
+delta = (pred - true)
+error = np.power(pred - true, 2)
+grad = np.zeros((delta.shape))
+# print (np.multiply(delta[:, 0], wlrec.flatten()))
+for i in range(delta.shape[1]):
+    grad[:, i] = np.multiply(delta[:, i], wlrec.flatten())
+mult_weights -= np.transpose(grad[0, :] * .1)
+
+# page 92 for multiple inputs and multiple outputs
+
+weights = [[.1, .1, -.3],  # hurt? 
+            [.1, .2, .0],   # wins?
+            [.0, 1.3, .1]   #sad?
+            ]
 
 
+weights = np.array(weights)
+
+hurt = np.array([.1, .0, .0, .1])
+win = np.array([1, 1, 0, 1])
+sad = np.array([.1, .0, .1, .2])
+
+true = np.concatenate((hurt.reshape(1, 4), win.reshape(1, 4), sad.reshape(1, 4)), axis=0)
+true = np.transpose(true)
+input = np.transpose(input)
+
+alpha = .01
+
+pred = np.dot(input, np.transpose(weights))
+delta = pred - true
+
+error = np.power(delta, 2)
+
+grad = np.zeros((delta.shape))
+print (delta.shape)
+
+for i in range(delta.shape[1]):
+    grad[:, i] = np.multiply(delta.T[:, i], input[0, :].flatten())
+
+weights -= grad
+
+print ()
+print ('----- delta -----')
+print (delta)
+print ()
+print ('----- error -----')
+print (error)
+print ()
+print ('----- grad -----')
+print (grad)
+print ()
+print ('----- updated weight -----')
+print (weights)
+# page 92 
 '''
 notice: 
 1. if weight is [w1, w2, w3], w1 does not change, and w2 and w3 move according to the gradient decent. what would happen. (Page 89)
