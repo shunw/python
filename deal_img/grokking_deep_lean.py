@@ -121,6 +121,11 @@ weights = [[.1, .1, -.3],  # hurt?
 
 
 weights = np.array(weights)
+weights = np.transpose(weights)
+
+print ()
+print ('----- weights -----')
+print (weights)
 
 hurt = np.array([.1, .0, .0, .1])
 win = np.array([1, 1, 0, 1])
@@ -132,32 +137,37 @@ input = np.transpose(input)
 
 alpha = .01
 
-pred = np.dot(input, np.transpose(weights))
+pred = np.dot(input, weights)
 delta = pred - true
 
 error = np.power(delta, 2)
 
-grad = np.zeros((delta.shape))
-print (delta.shape)
+grad = np.zeros((weights.shape))
 
-for i in range(delta.shape[1]):
-    grad[:, i] = np.multiply(delta.T[:, i], input[0, :].flatten())
+grad = np.dot(np.transpose(input[0, :]).reshape(3, 1), delta[0, :].reshape(1, 3))
+# print (a)
+# 取 delta 第一行，然后copy变成三行之后 对应一个个乘 input
+# for i in range(weight.shape[0]):
+#     grad[:, i] = np.multiply(delta.T[:, i], input[0, :].flatten())
 
 weights -= grad
 
 print ()
 print ('----- delta -----')
-print (delta)
+print (delta[0, :])
 print ()
 print ('----- error -----')
-print (error)
+print (error[0, :])
+print ()
+print ('----- pred -----')
+print (pred[0, :])
 print ()
 print ('----- grad -----')
 print (grad)
 print ()
 print ('----- updated weight -----')
 print (weights)
-# page 92 
+
 '''
 notice: 
 1. if weight is [w1, w2, w3], w1 does not change, and w2 and w3 move according to the gradient decent. what would happen. (Page 89)
@@ -171,4 +181,14 @@ notice:
     3. This tells you what the graphs really are(three graph, x-axis is weight, y-axis is error). In truth, these are 2D slices of a four-dimensional shape. Three of the dimensions are the weight values, and the fourth dimention is the error. This shape is called the error plane, and, its curvature is determined by the training data. 
 
     4. error is determined by the training data. Any network can have any weight value, but the value of error given any particular weight configuration is 100% determined by data, You've already seen how the steepness of the U shape is affected by the input data(on several occasions). What you are really trying to do with the neural networks is find the lowest point on this big error plance, where the lowest point refers to the lowest error. 
+
+2. What is the relationship between input and weight? 
+
+    1. each output node has a weight coming from every pixel. 
+
+    2. if the weight is high, it means the model believes there is a high degree of correlation between that pixel and the output image. 
+
+    3. Performing dot products between two identical vectors tends to result in higher scores. (if input and weights are identical/ similar, this would have a higher score. )
+
+    4. can check the middle image for check when doing the deep learning. 
 '''
