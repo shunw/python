@@ -1,172 +1,71 @@
 import numpy as np
 
-weights = np.array([0.1, 0.2, 0])
-def neural_network_sin(input, weights):
-    '''
-    only have single layer of the neural network
-    '''
-    # pred = input.dot(weights)
-    pred = weights.dot(input)
-    return pred
-
-toes = np.array([8.5, 9.5, 9.9, 9.0])
-wlrec = np.array([0.65, 0.8, 0.8, 0.9])
-nfans = np.array([1.2, 1.3, 0.5, 1.0])
-
-weights = [[.1, .1, -.3],  # hurt? 
-            [.1, .2, .0],   # wins?
-            [.0, 1.3, .1]   #sad?
-            ]
-
-
-weights = np.array(weights)
-input = np.concatenate((toes.reshape(1, 4), wlrec.reshape(1, 4), nfans.reshape(1, 4)), axis=0)
-# weights = weights.reshape(1, 3)
-# print (input.shape)
-
-pred = neural_network_sin(input,weights)
-# print(pred)
 
 '''
-predicting on predictions
+chapter 6 --- street light vs walk&stop
 '''
+class nn_street_light(object): 
+    def __init__(self, input, target, weights, alpha, error_method = 'sqr_error'):
+        self.input = input
+        self.target = target
+        self.weights = weights
+        self.alpha = alpha
+        self.error_method = error_method
+    
+    def forword_pp(self): 
+        self.pred = np.dot(self.input, np.transpose(self.weights))
+            
+    def cost_cal(self): 
+        if self.error_method == 'sqr_error': 
+            self.error = np.power(self.target - self.pred, 2)
+        
+        self.delta = self.target - self.pred
 
-ih_wgt = [[.1, .2, -.1],  # hid[0]
-            [-.1, .1, .9],  # hid[1]
-            [.1, .4, .1]]   # hid [2]
+    def nn_forward_back_pp(self): 
+        '''
+        stochastic gradient descent: 
+            there are two loops: the outer is the iteration loop, the inner is the total data loop
+        '''
+        self.grad = np.zeros((self.weights.shape))
+        if self.error_method == 'sqr_error': 
+            for iteration in range(40): 
+                error_for_all_lights = 0
+                for r in range(self.input.shape[0]): 
+                    pred = np.dot(self.input[r, :], np.transpose(self.weights))
+                    error = np.power(pred - self.target[r], 2) 
+                    delta = pred-self.target[r]
+                    self.grad = delta * self.input[r, :] * self.alpha
+                    self.weights -= self.grad
+                    error_for_all_lights += error
+                print ('Error: {all_lights}'.format(all_lights = error_for_all_lights))
+            print (self.weights)
+            
+    def final_run(self): 
+        # self.forword_pp()
+        # self.cost_cal()
+        self.nn_forward_back_pp()
 
-hp_wgt = [[.3, 1.1, -.3],  # hurt?
-            [.1, .2, .0],  # win? 
-            [.0, 1.3, .1]] # sad?
+if __name__ == '__main__': 
+    streetlights = np.array([[1, 0, 1], 
+                            [0, 1, 1], 
+                            [0, 0, 1], 
+                            [1, 1, 1], 
+                            [0, 1, 1], 
+                            [1, 0, 1]])
 
-ih_wgt = np.array(ih_wgt)
-hp_wgt = np.array(hp_wgt)
-weights = [ih_wgt, hp_wgt]
+    walk_vs_stop = np.array([[0], 
+                            [1], 
+                            [0], 
+                            [1], 
+                            [1], 
+                            [0]])
 
-def neural_network_mult(input, weights):
-    '''
-    w/ 2 layers of the neural network
-    '''
-    hid = weights[0].dot(input)
-    pred = weights[1].dot(hid)
-    return pred
+    weights = np.array([.5, .48, -.7])
+    alpha = .1
+    nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, weights = weights, alpha = alpha)
+    nn_street_light.final_run()
 
-pred = neural_network_mult(input, weights)
-# print (pred)
-
-
-'''
-till chapter 5
-'''
-
-wgt = ih_wgt[0]
-# pred = neural_network_sin(input, wgt)
-win_or_lose_binary = np.array([1, 1, 0, 1])
-
-'''
-need: 
-    error? 
-    weight - delta weight * alpha
-'''
-# for i in range(3):
-#     pred = neural_network_sin(input, wgt)
-#     error = np.power(pred - win_or_lose_binary, 2)
-
-#     # print (wgt.shape)
-#     grad = pred - win_or_lose_binary
-
-#     wgt_delta = input * grad[0]
-
-#     # print (input.dot(pred - win_or_lose_binary))
-#     wgt[1:] = wgt[1:] - (wgt_delta[:, 0] *0.01)[1:]
-#     print ('-' * 10)
-#     print ('Iteration: ' + str(i + 1))
-#     print ('Pred: ' + str(pred))
-#     print ('Error: ' + str(error))
-#     print ('Weight_Delta: ' + str(wgt_delta[:, 0]))
-#     print ('Weights: ' + str(wgt))
-
-
-# till page 90 Gradient descent learning with multiple outputs
-
-mult_weights = np.array([.3, .2, .9])
-mult_weights = mult_weights.reshape(1, 3)
-
-wlrec = np.array([0.65, 1.0, 1.0, 0.9])
-wlrec = wlrec.reshape(4, 1)
-
-hurt = np.array([.1, .0, .0, .1])
-win = np.array([1, 1, 0, 1])
-sad = np.array([.1, .0, .1, .2])
-
-
-true = np.concatenate((hurt.reshape(1, 4), win.reshape(1, 4), sad.reshape(1, 4)), axis=0)
-true = np.transpose(true)
-
-pred = np.dot(wlrec, mult_weights)
-delta = (pred - true)
-error = np.power(pred - true, 2)
-grad = np.zeros((delta.shape))
-# print (np.multiply(delta[:, 0], wlrec.flatten()))
-for i in range(delta.shape[1]):
-    grad[:, i] = np.multiply(delta[:, i], wlrec.flatten())
-mult_weights -= np.transpose(grad[0, :] * .1)
-
-# page 92 for multiple inputs and multiple outputs
-
-weights = [[.1, .1, -.3],  # hurt? 
-            [.1, .2, .0],   # wins?
-            [.0, 1.3, .1]   #sad?
-            ]
-
-
-weights = np.array(weights)
-weights = np.transpose(weights)
-
-print ()
-print ('----- weights -----')
-print (weights)
-
-hurt = np.array([.1, .0, .0, .1])
-win = np.array([1, 1, 0, 1])
-sad = np.array([.1, .0, .1, .2])
-
-true = np.concatenate((hurt.reshape(1, 4), win.reshape(1, 4), sad.reshape(1, 4)), axis=0)
-true = np.transpose(true)
-input = np.transpose(input)
-
-alpha = .01
-
-pred = np.dot(input, weights)
-delta = pred - true
-
-error = np.power(delta, 2)
-
-grad = np.zeros((weights.shape))
-
-grad = np.dot(np.transpose(input[0, :]).reshape(3, 1), delta[0, :].reshape(1, 3))
-# print (a)
-# 取 delta 第一行，然后copy变成三行之后 对应一个个乘 input
-# for i in range(weight.shape[0]):
-#     grad[:, i] = np.multiply(delta.T[:, i], input[0, :].flatten())
-
-weights -= grad
-
-print ()
-print ('----- delta -----')
-print (delta[0, :])
-print ()
-print ('----- error -----')
-print (error[0, :])
-print ()
-print ('----- pred -----')
-print (pred[0, :])
-print ()
-print ('----- grad -----')
-print (grad)
-print ()
-print ('----- updated weight -----')
-print (weights)
+# till page 111
 
 '''
 notice: 
@@ -191,4 +90,19 @@ notice:
     3. Performing dot products between two identical vectors tends to result in higher scores. (if input and weights are identical/ similar, this would have a higher score. )
 
     4. can check the middle image for check when doing the deep learning. 
+
+3. gradient descent: 
+    
+    1. stochastic gradient descent: learning one example at a time is a variant on gradient descent. 
+
+    2. full gradient descent updates weights one dataset at a time. 
+
+    3. batch gradient descent updates weights after n examples
+
+4. in the process of gradient descent, each training example asserts either up pressure or down pressure on the weights. Where does the pressure come from? Why is it different for different weights? (page 111)
+
+    1. up and down pressure comes from the data
+
+        1. each node is individually trying to correctly predict the output given the input. For the most part, each node ignores all the other nodes when attempting to do so. The only cross communication occurs in that all three weights must share the same error measure. The weight update is nothing more than taking this shared error measure and multiplying it by each respective input. 
+
 '''
