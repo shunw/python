@@ -65,7 +65,7 @@ if __name__ == '__main__':
     nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, weights = weights, alpha = alpha)
     nn_street_light.final_run()
 
-# till page 116
+# till page 120
 
 '''
 notice: 
