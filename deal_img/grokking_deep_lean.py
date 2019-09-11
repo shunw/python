@@ -65,10 +65,11 @@ if __name__ == '__main__':
     nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, weights = weights, alpha = alpha)
     nn_street_light.final_run()
 
-# till page 111
+# till page 116
 
 '''
 notice: 
+
 1. if weight is [w1, w2, w3], w1 does not change, and w2 and w3 move according to the gradient decent. what would happen. (Page 89)
     
     1. if you converged (reached error == 0) with w2 and w3, and then tried to train w1. w1 won't move because error == 0, which means weight_delta == 0
@@ -105,4 +106,11 @@ notice:
 
         1. each node is individually trying to correctly predict the output given the input. For the most part, each node ignores all the other nodes when attempting to do so. The only cross communication occurs in that all three weights must share the same error measure. The weight update is nothing more than taking this shared error measure and multiplying it by each respective input. 
 
+5. deep learning weakness/ edge case
+
+    1. overfitting: error is shared among all  the weights. if a particular configuration of weights accidentallly creates perfect correlation between the prediction and the output dataset (such that error == 0), without giving the heavist weight to the best inputs, the neural network will stop learning. 
+
+    2. conflicting pressure: regularization is advantageous because if a weight has equal pressure upward and donward, it isn't good for anything. 
+        
+        
 '''
