@@ -1,30 +1,34 @@
 import numpy as np
 
+np.random.seed(1)
 
 '''
 chapter 6 --- street light vs walk&stop
 '''
+
+def relu(x): 
+    return ( x > 0 ) * x
+
 class nn_street_light(object): 
-    def __init__(self, input, target, weights, alpha, error_method = 'sqr_error'):
+    '''
+    only for one layer of hidden layer. totally three layer, the other two is one input layer, and the other is output layer. 
+    '''
+    def __init__(self, input, target, hidden_size, alpha, error_method = 'sqr_error'):
         self.input = input
         self.target = target
-        self.weights = weights
+        self.hidden_size = hidden_size
         self.alpha = alpha
         self.error_method = error_method
-    
-    def forword_pp(self): 
-        self.pred = np.dot(self.input, np.transpose(self.weights))
-            
-    def cost_cal(self): 
-        if self.error_method == 'sqr_error': 
-            self.error = np.power(self.target - self.pred, 2)
-        
-        self.delta = self.target - self.pred
 
+        self.weights_0_1 = 2 * np.random.random((self.input.shape[1], self.hidden_size)) -1
+        self.weights_1_2 = 2 * np.random.random((self.hidden_size, self.target.shape[1])) -1
+    
     def nn_forward_back_pp(self): 
         '''
         stochastic gradient descent: 
             there are two loops: the outer is the iteration loop, the inner is the total data loop
+        
+        this is for just one layer
         '''
         self.grad = np.zeros((self.weights.shape))
         if self.error_method == 'sqr_error': 
@@ -49,23 +53,29 @@ if __name__ == '__main__':
     streetlights = np.array([[1, 0, 1], 
                             [0, 1, 1], 
                             [0, 0, 1], 
-                            [1, 1, 1], 
-                            [0, 1, 1], 
-                            [1, 0, 1]])
+                            [1, 1, 1] ])
+                            # , 
+                            # [0, 1, 1], 
+                            # [1, 0, 1]])
 
-    walk_vs_stop = np.array([[0], 
-                            [1], 
-                            [0], 
-                            [1], 
-                            [1], 
-                            [0]])
+    walk_vs_stop = np.array([[1, 1, 0, 0]]).T
 
-    weights = np.array([.5, .48, -.7])
-    alpha = .1
-    nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, weights = weights, alpha = alpha)
+    # walk_vs_stop = np.array([[0], 
+    #                         [1], 
+    #                         [0], 
+    #                         [1], 
+    #                         [1], 
+    #                         [0]])
+
+    # weights = np.array([.5, .48, -.7])
+        
+    alpha = .2
+    hidden_size = 4 
+
+    nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, hidden_size = hidden_size, alpha = alpha)
     nn_street_light.final_run()
 
-# till page 120
+# till page 126 for the first two layer nn
 
 '''
 notice: 
