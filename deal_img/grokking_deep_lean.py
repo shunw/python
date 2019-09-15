@@ -1,4 +1,8 @@
 import numpy as np
+import gzip
+import pickle
+import os.path
+import os
 
 np.random.seed(1)
 
@@ -8,19 +12,31 @@ chapter 6 --- street light vs walk&stop
 
 def relu(x): 
     return ( x > 0 ) * x
+
 def relu2deriv(output): 
     return output > 0
 
+def conv2hotlabel(labels):
+    '''
+    this is to convert to one-hot-label. for instance, if labels have number from 0-9, then the one-hot-label has 10 features. 
+    '''
+    col_feat = len(set(labels))
+    one_hot_label = np.zeros((len(labels), col_feat))
+    for i, j in enumerate(labels): 
+        one_hot_label[i, j] = 1
+    return one_hot_label
+    
+
 class book_sample(object): 
     def __init__(self, streetlights, walks_vs_stop, alpha, hidden_size, weights_0_1, weights_1_2): 
-        self.streetlights = streetlights
-        self.walk_vs_stop = walks_vs_stop
+        self.images = streetlights
+        self.labels = walks_vs_stop
         self.alpha = alpha
         self.hidden_size = hidden_size
         self.weights_0_1 = weights_0_1
         self.weights_1_2 = weights_1_2
     
-    def process(self):
+    def process_streetlight(self):
 
         weights_0_1 = self.weights_0_1.copy()
         weights_1_2 = self.weights_1_2.copy()
@@ -56,26 +72,48 @@ class book_sample(object):
                 print ('Error: {}'.format(layer_2_error))
 
             break
+    
+    def process_mnist(self): 
+        iterations = 350
+        for j in range(iterations): 
+            error, correct_cnt = (0.0, 0)
+            
+            for i in range(len(self.images)): 
+                layer_0 = self.images[i: i+1]
+                layer_1 = relu(np.dot(layer_0, self.weights_0_1))
+                layer_2 = np.dot(layer_1, self.weights_1_2)
+                error += np.sum((self.labels[i: i+1] - layer_2) ** 2)
+                correct_cnt += int(np.argmax(layer_2) == np.argmax(self.labels[i:i + 1]))
+
+                layer_2_delta = (self.labels[i: i + 1] - layer_2)
+                layer_1_delta = layer_2_delta.dot(self.weights_1_2.T) * relu2deriv(layer_1)
+
+                self.weights_1_2 -= self.alpha * layer_1_delta.T.dot(layer_2_delta)
+                self.weights_0_1 -= self.alpha * layer_0.T.dot(layer_1_delta)
+
+            if (j == 349 or j % 10 == 9): 
+                print ('I == {}'.format(j))
+                print (' Error: {err:.3f} \n Correct: {corr}'.format(err = error / float(len(self.images)), corr = correct_cnt / float(len(self.images))))
+
 
 class nn_street_light(object): 
     '''
     only for one layer of hidden layer. totally three layer, the other two is one input layer, and the other is output layer. 
     '''
-    def __init__(self, input, target, hidden_size, alpha,  weights_0_1, weights_1_2, error_method = 'sqr_error'):
+    def __init__(self, input, target, hidden_size, alpha, iterations, weights_0_1, weights_1_2, error_method = 'sqr_error'):
         self.input = input
         self.target = target
         self.hidden_size = hidden_size
         self.alpha = alpha
         self.error_method = error_method
+        self.iterations = iterations
 
-        # self.weights_0_1 = 2 * np.random.random((self.input.shape[1], self.hidden_size)) -1
-        # self.weights_1_2 = 2 * np.random.random((self.hidden_size, self.target.shape[1])) -1
+        self.layer1_feat = self.input.shape[1]
+        self.layer2_feat = self.hidden_size
+        self.layer3_feat = self.target.shape[1]
 
-        # self.weights_0_1 = 2 * np.random.random((self.hidden_size, self.input.shape[1])) -1
-        # self.weights_1_2 = 2 * np.random.random((self.target.shape[1], self.hidden_size)) -1
-
-        self.weights_0_1 = weights_0_1
-        self.weights_1_2 = weights_1_2
+        self.weights_0_1 = weights_0_1 # 40 * 784
+        self.weights_1_2 = weights_1_2 # 10 * 40
 
         self.weights = None # this is for the two layers nn
 
@@ -86,21 +124,24 @@ class nn_street_light(object):
         
         this is for just three layers
         '''
-        for iteration in range (60): 
-            layer2_error = 0
+        for j in range(self.iterations): 
+            layer2_error = 0.0
+            correct_cnt = 0
             for r in range(self.input.shape[0]):
-                pre_layer1 = relu(np.dot(self.input[r, :], np.transpose(self.weights_0_1)))
-                pre_layer2 = np.dot(pre_layer1, np.transpose(self.weights_1_2))
+                pre_layer1 = relu(np.dot(self.input[r, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
+                pre_layer2 = np.dot(pre_layer1, np.transpose(self.weights_1_2)) # [1, 40] * [40, 10] => [1, 10]
                 
-                # print ('wendy_weights: {}'.format(np.transpose(self.weights_0_1)))
-                # print ('wendy_layer1-mid: {}'.format(np.dot(self.input[r, :], np.transpose(self.weights_0_1))))
+                delta = pre_layer2 - self.target[r] # [1, 10]
                 
-                delta = pre_layer2 - self.target[r]
-                layer2_error += np.power(delta, 2)
+                layer2_error += np.sum(np.power(delta, 2))
                 
-                grad_1_2 = delta * pre_layer1
+                correct_cnt += int(np.argmax(pre_layer2) == np.argmax(self.target[r]))
                 
-                grad_0_1 = np.dot(self.input[r, :].reshape(self.input.shape[1], 1), (delta * np.multiply(relu2deriv(pre_layer1), self.weights_1_2)).reshape(1, len(pre_layer1)))
+                # get the grad with multiple output
+                grad_1_2 = np.dot(delta.reshape(self.layer3_feat, 1), pre_layer1.reshape(1, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
+                
+
+                grad_0_1 = np.dot(self.input[r, :].reshape(self.layer1_feat, 1), np.multiply(np.dot(delta.reshape(1, self.layer3_feat), self.weights_1_2), relu2deriv(pre_layer1)))
                 # print (self.weights_1_2.shape)
                 # print (pre_layer1.shape)
                 # print (grad_0_1)
@@ -109,17 +150,20 @@ class nn_street_light(object):
                 
 
                 self.weights_1_2 -= self.alpha * grad_1_2
+                # print (self.weights_1_2.shape)
+                # print (self.weights_0_1.shape)
                 self.weights_0_1 -= self.alpha * grad_0_1.T
                 
-                # print ('wendy_layer1: {}'.format(pre_layer1))
-                # print ('wendy_layer2: {}'.format(pre_layer2))
-                # print ('wendy_grad12: {}'.format(self.alpha * grad_1_2))
-                # print ('wendy_grad01: {}'.format(self.alpha * grad_0_1.T))
+                # # print ('wendy_layer1: {}'.format(pre_layer1))
+                # # print ('wendy_layer2: {}'.format(pre_layer2))
+                # # print ('wendy_grad12: {}'.format(self.alpha * grad_1_2))
+                # # print ('wendy_grad01: {}'.format(self.alpha * grad_0_1.T))
 
                 # break
 
-            if (iteration % 10 == 9): 
-                print ('Error: {}'.format(layer2_error))
+            if (j == 349 or j % 10 == 9): 
+                print ('I == {}'.format(j))
+                print (' Error: {err:.3f} \n Correct: {corr}'.format(err = layer2_error / float(len(self.input)), corr = correct_cnt / float(len(self.input))))
 
             
             # break
@@ -170,31 +214,52 @@ if __name__ == '__main__':
     #                         [0]])
 
     # weights = np.array([.5, .48, -.7])
-        
-    alpha = .2
-    hidden_size = 4 
 
-    weights_0_1 = 2 * np.random.random((3, hidden_size)) - 1
-    weights_1_2 = 2 * np.random.random((hidden_size, 1)) - 1
+    mnist_data_path = '/Users/zhang/github/standford_ML/pytorch/data/mnist/mnist.pkl.gz'
+
+    with gzip.open(mnist_data_path, "rb") as f:
+        ((x_train, y_train), (x_valid, y_valid), _) = pickle.load(f, encoding="latin-1")
+
+    alpha = .005
+    iterations = 350
+    hidden_size = 40
+    pixels_per_image = 784
+    label_feat = 10
+    pick_sample = 1000
+
+    images, labels = (x_train[:pick_sample].reshape(pick_sample, pixels_per_image)/255, y_train[:pick_sample])
+    
+    labels_one_hot = conv2hotlabel(labels).copy()
+
+    
+    weights_0_1 = .2 * np.random.random((images.shape[1], hidden_size)) - .1
+    weights_1_2 = .2 * np.random.random((hidden_size, labels_one_hot.shape[1])) - .1
     # print ('original weights: {}'.format(weights_0_1))
 
+    
+    
+    
+    # print ()
+    # print ('-=' * 10)
+    # nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()))
+    # nn_street_light.final_run()
+
+
+    # print ()
+    # print ('-=' * 10)
+    # print ('original weights: {}'.format(weights_0_1))
+    
     print ()
     print ('-=' * 10)
-    nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, hidden_size = hidden_size, alpha = alpha, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()))
-    nn_street_light.final_run()
+    
+    book_sample = book_sample(images, labels_one_hot, alpha, hidden_size, weights_0_1 = weights_0_1.copy(), weights_1_2 = weights_1_2.copy())
+    book_sample.process_mnist()
 
-    
-    # print ()
-    # print ('-=' * 10)
-    # print ('original weights: {}'.format(weights_0_1))
-    
-    # print ()
-    # print ('-=' * 10)
-    
-    # book_sample = book_sample(streetlights, walk_vs_stop, alpha, hidden_size, weights_0_1 = weights_0_1, weights_1_2 = weights_1_2)
-    # book_sample.process()
 
-    # till page 126 for the first two layer nn
+    # till page 147 for the first two layer nn
+        # book samples' label is to use the one_hot_labels, which has 10 column represent 10 number position. 
+
+        # would you please try to use the neural number as the label.
 
 '''
 notice: 
