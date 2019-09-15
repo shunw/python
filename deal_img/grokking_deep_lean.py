@@ -8,27 +8,129 @@ chapter 6 --- street light vs walk&stop
 
 def relu(x): 
     return ( x > 0 ) * x
+def relu2deriv(output): 
+    return output > 0
+
+class book_sample(object): 
+    def __init__(self, streetlights, walks_vs_stop, alpha, hidden_size, weights_0_1, weights_1_2): 
+        self.streetlights = streetlights
+        self.walk_vs_stop = walks_vs_stop
+        self.alpha = alpha
+        self.hidden_size = hidden_size
+        self.weights_0_1 = weights_0_1
+        self.weights_1_2 = weights_1_2
+    
+    def process(self):
+
+        weights_0_1 = self.weights_0_1.copy()
+        weights_1_2 = self.weights_1_2.copy()
+
+        for iteration in range(60): 
+            layer_2_error = 0
+            for i in range(len(self.streetlights)): 
+                layer_0 = self.streetlights[i: i+1]
+                
+                # print ('book_weights: {}'.format(weights_0_1))
+                # print ('book_layer1-mid: {}'.format(np.dot(layer_0, weights_0_1)))
+                
+                layer_1 = relu(np.dot(layer_0, weights_0_1))
+                layer_2 = np.dot(layer_1, weights_1_2)
+
+                layer_2_error += np.sum((layer_2 - self.walk_vs_stop[i : i+1]) ** 2)
+
+                layer_2_delta = (layer_2 - self.walk_vs_stop[i : i+ 1])
+                layer_1_delta = layer_2_delta.dot(weights_1_2.T) * relu2deriv(layer_1)
+                
+                
+                
+                weights_1_2 -= self.alpha * layer_1.T.dot(layer_2_delta)
+                weights_0_1 -= self.alpha * layer_0.T.dot(layer_1_delta)
+                # print ('book_layer1: {}'.format(layer_1))
+                # print ('book_layer2: {}'.format(layer_2))
+                print ('book_grad12: {}'.format(self.alpha * layer_1.T.dot(layer_2_delta)))
+                print ('book_grad01: {}'.format(self.alpha * layer_0.T.dot(layer_1_delta)))
+
+                break
+            
+            if (iteration % 10 == 9): 
+                print ('Error: {}'.format(layer_2_error))
+
+            break
 
 class nn_street_light(object): 
     '''
     only for one layer of hidden layer. totally three layer, the other two is one input layer, and the other is output layer. 
     '''
-    def __init__(self, input, target, hidden_size, alpha, error_method = 'sqr_error'):
+    def __init__(self, input, target, hidden_size, alpha,  weights_0_1, weights_1_2, error_method = 'sqr_error'):
         self.input = input
         self.target = target
         self.hidden_size = hidden_size
         self.alpha = alpha
         self.error_method = error_method
 
-        self.weights_0_1 = 2 * np.random.random((self.input.shape[1], self.hidden_size)) -1
-        self.weights_1_2 = 2 * np.random.random((self.hidden_size, self.target.shape[1])) -1
-    
+        # self.weights_0_1 = 2 * np.random.random((self.input.shape[1], self.hidden_size)) -1
+        # self.weights_1_2 = 2 * np.random.random((self.hidden_size, self.target.shape[1])) -1
+
+        # self.weights_0_1 = 2 * np.random.random((self.hidden_size, self.input.shape[1])) -1
+        # self.weights_1_2 = 2 * np.random.random((self.target.shape[1], self.hidden_size)) -1
+
+        self.weights_0_1 = weights_0_1
+        self.weights_1_2 = weights_1_2
+
+        self.weights = None # this is for the two layers nn
+
+    def nn_forward_back_pp_3(self): 
+        '''
+        stochastic gradient descent: 
+            there are two loops: the outer is the iteration loop, the inner is the total data loop
+        
+        this is for just three layers
+        '''
+        for iteration in range (60): 
+            layer2_error = 0
+            for r in range(self.input.shape[0]):
+                pre_layer1 = relu(np.dot(self.input[r, :], np.transpose(self.weights_0_1)))
+                pre_layer2 = np.dot(pre_layer1, np.transpose(self.weights_1_2))
+                
+                # print ('wendy_weights: {}'.format(np.transpose(self.weights_0_1)))
+                # print ('wendy_layer1-mid: {}'.format(np.dot(self.input[r, :], np.transpose(self.weights_0_1))))
+                
+                delta = pre_layer2 - self.target[r]
+                layer2_error += np.power(delta, 2)
+                
+                grad_1_2 = delta * pre_layer1
+                
+                grad_0_1 = np.dot(self.input[r, :].reshape(self.input.shape[1], 1), (delta * np.multiply(relu2deriv(pre_layer1), self.weights_1_2)).reshape(1, len(pre_layer1)))
+                # print (self.weights_1_2.shape)
+                # print (pre_layer1.shape)
+                # print (grad_0_1)
+                
+                
+                
+
+                self.weights_1_2 -= self.alpha * grad_1_2
+                self.weights_0_1 -= self.alpha * grad_0_1.T
+                
+                # print ('wendy_layer1: {}'.format(pre_layer1))
+                # print ('wendy_layer2: {}'.format(pre_layer2))
+                # print ('wendy_grad12: {}'.format(self.alpha * grad_1_2))
+                # print ('wendy_grad01: {}'.format(self.alpha * grad_0_1.T))
+
+                # break
+
+            if (iteration % 10 == 9): 
+                print ('Error: {}'.format(layer2_error))
+
+            
+            # break
+
+
     def nn_forward_back_pp(self): 
         '''
         stochastic gradient descent: 
             there are two loops: the outer is the iteration loop, the inner is the total data loop
         
-        this is for just one layer
+        this is for just two layers
         '''
         self.grad = np.zeros((self.weights.shape))
         if self.error_method == 'sqr_error': 
@@ -47,7 +149,7 @@ class nn_street_light(object):
     def final_run(self): 
         # self.forword_pp()
         # self.cost_cal()
-        self.nn_forward_back_pp()
+        self.nn_forward_back_pp_3()
 
 if __name__ == '__main__': 
     streetlights = np.array([[1, 0, 1], 
@@ -72,10 +174,27 @@ if __name__ == '__main__':
     alpha = .2
     hidden_size = 4 
 
-    nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, hidden_size = hidden_size, alpha = alpha)
+    weights_0_1 = 2 * np.random.random((3, hidden_size)) - 1
+    weights_1_2 = 2 * np.random.random((hidden_size, 1)) - 1
+    # print ('original weights: {}'.format(weights_0_1))
+
+    print ()
+    print ('-=' * 10)
+    nn_street_light = nn_street_light(input = streetlights, target = walk_vs_stop, hidden_size = hidden_size, alpha = alpha, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()))
     nn_street_light.final_run()
 
-# till page 126 for the first two layer nn
+    
+    # print ()
+    # print ('-=' * 10)
+    # print ('original weights: {}'.format(weights_0_1))
+    
+    # print ()
+    # print ('-=' * 10)
+    
+    # book_sample = book_sample(streetlights, walk_vs_stop, alpha, hidden_size, weights_0_1 = weights_0_1, weights_1_2 = weights_1_2)
+    # book_sample.process()
+
+    # till page 126 for the first two layer nn
 
 '''
 notice: 
