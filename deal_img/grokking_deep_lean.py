@@ -182,10 +182,10 @@ class nn_street_light(object):
 
                 # break
 
-            if (j % 10 == 0 and self.test_data): 
+            if (j % 10 == 0 and self.test_data):  # <- stop here
                 test_error = 0.0
                 test_correct_cnt = 0
-                
+
                 print ('I == {}'.format(j))
                 print (' Error: {err:.3f} \n Correct: {corr}'.format(err = layer2_error / float(len(self.input)), corr = correct_cnt / float(len(self.input))))
 
