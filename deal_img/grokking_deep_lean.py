@@ -109,13 +109,14 @@ class nn_street_light(object):
     '''
     only for one layer of hidden layer. totally three layer, the other two is one input layer, and the other is output layer. 
     '''
-    def __init__(self, input, target, hidden_size, alpha, iterations, weights_0_1, weights_1_2, error_method = 'sqr_error', test_data = None, test_labels = None):
+    def __init__(self, input, target, hidden_size, alpha, iterations, weights_0_1, weights_1_2, error_method = 'sqr_error', test_data = None, test_labels = None, batch_size = 1):
         self.input = input
         self.target = target
         self.hidden_size = hidden_size
         self.alpha = alpha
         self.error_method = error_method
         self.iterations = iterations
+        self.batch_size = batch_size
 
         self.layer1_feat = self.input.shape[1]
         self.layer2_feat = self.hidden_size
@@ -136,33 +137,43 @@ class nn_street_light(object):
             there are two loops: the outer is the iteration loop, the inner is the total data loop
         
         this is for just three layers
+
+        mini-batched stochastic gradient descent, need to assign the batch size
         '''
         for j in range(self.iterations): 
             layer2_error = 0.0
             correct_cnt = 0
-            for r in range(self.input.shape[0]):
-                
-                
-                
-                pre_layer1 = relu(np.dot(self.input[r, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
 
+            for r in range(int(self.input.shape[0]/ self.batch_size)):
+                
+                batch_start = r * self.batch_size
+                batch_end = (r + 1) * self.batch_size
+                
+                pre_layer1 = relu(np.dot(self.input[batch_start : batch_end, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
+                # print ('prelayer1 shape {}'.format(pre_layer1.shape))
                 dropout_mask = np.random.randint(2, size = pre_layer1.shape)
                 pre_layer1 *= dropout_mask * 2
                 pre_layer2 = np.dot(pre_layer1, np.transpose(self.weights_1_2)) # [1, 40] * [40, 10] => [1, 10]
                 
-                delta = pre_layer2 - self.target[r] # [1, 10]
+                delta = pre_layer2 - self.target[batch_start : batch_end] # [1, 10]
                 
                 layer2_error += np.sum(np.power(delta, 2))
                 
-                correct_cnt += int(np.argmax(pre_layer2) == np.argmax(self.target[r]))
+                correct_cnt += int(np.argmax(pre_layer2) == np.argmax(self.target[batch_start : batch_end]))
                 
                 # get the grad with multiple output
-                grad_1_2 = np.dot(delta.reshape(self.layer3_feat, 1), pre_layer1.reshape(1, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
+                grad_1_2 = np.dot(delta.reshape(self.layer3_feat, self.batch_size), pre_layer1.reshape(self.batch_size, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
                 
 
-                grad_0_1 = np.dot(self.input[r, :].reshape(self.layer1_feat, 1), np.multiply(np.dot(delta.reshape(1, self.layer3_feat), self.weights_1_2), relu2deriv(pre_layer1)))
+                layer_1_delta = np.multiply(np.dot(delta.reshape(self.batch_size, self.layer3_feat), self.weights_1_2), relu2deriv(pre_layer1))
+
+                layer_1_delta *= dropout_mask
+
+                grad_0_1 = np.dot(self.input[batch_start : batch_end, :].reshape(self.layer1_feat, self.batch_size), layer_1_delta)
+
+                # print ('grad01 shape {}'.format(grad_0_1.shape))
+                # print ('dropout shape {}'.format(dropout_mask.shape))
                 
-                grad_0_1 *= dropout_mask
                 # print (self.weights_1_2.shape)
                 # print (pre_layer1.shape)
                 # print (grad_0_1)
@@ -182,17 +193,26 @@ class nn_street_light(object):
 
                 # break
 
-            if (j % 10 == 0 and self.test_data):  # <- stop here
+                weights_ls = list([self.weights_0_1.copy(), self.weights_1_2.copy()])
+
+
+            if (j % 10 == 0 and len(self.test_data)):  # <- stop here
                 test_error = 0.0
                 test_correct_cnt = 0
 
+                val_part = validation_nn(self.test_data, self.test_labels, weights_ls)
+                err_cnt_ls = val_part.validate_test_data()
+                # print (err_cnt_ls)
+
                 print ('I == {}'.format(j))
-                print (' Error: {err:.3f} \n Correct: {corr}'.format(err = layer2_error / float(len(self.input)), corr = correct_cnt / float(len(self.input))))
+                print (' Test-Error: {err:.3f}; Test-Correct: {corr:.3f}; Train-Error: {terr:.3f}; Train-Correct: {tcorr:.3f}'.format(err = err_cnt_ls[0], corr = err_cnt_ls[1], terr = layer2_error / (batch_end + 1), tcorr = correct_cnt / (batch_end + 1)))
+
+                
 
             np.save('mnist_weights_0_1.npy', self.weights_0_1) 
             np.save('mnist_weights_1_2.npy', self.weights_1_2) 
 
-            # break
+            break
 
     def nn_forward_back_pp(self): 
         '''
@@ -235,10 +255,14 @@ class validation_nn():
         correct_cnt = 0
         layer_1 = relu(np.dot(self.test_data, np.transpose(self.weights_0_1))) # m * 40
         layer_2 = np.dot(layer_1, np.transpose(self.weights_1_2)) # m * 10
-        for i in range(len(layer_2)):
-            correct_cnt += int(np.argmax(layer_2[i]) == np.argmax(self.test_labels[i]))
+        test_error = np.sum(np.power(layer_2 - self.test_labels, 2))
+
+        correct_cnt = np.sum(np.argmax(layer_2, axis = 1) == np.argmax(self.test_labels, axis = 1))
+        # for i in range(len(layer_2)):
             
-        print (correct_cnt/self.test_labels.shape[0])
+        #     correct_cnt += int(np.argmax(layer_2[i]) == np.argmax(self.test_labels[i]))
+            
+        return [test_error/self.test_labels.shape[0], correct_cnt/self.test_labels.shape[0]]
 
     def final_run(self): 
         self.validate_test_data()
@@ -269,12 +293,13 @@ if __name__ == '__main__':
     with gzip.open(mnist_data_path, "rb") as f:
         ((x_train, y_train), (x_valid, y_valid), _) = pickle.load(f, encoding="latin-1")
 
-    alpha = .005
+    alpha = .001
     iterations = 300
     hidden_size = 100
     pixels_per_image = 784
     label_feat = 10
     pick_sample = 1000
+    batch_size = 100
 
     images, labels = (x_train[:pick_sample], y_train[:pick_sample]) # .reshape(pick_sample, pixels_per_image)
     test_images, test_labels = (x_valid, y_valid)
@@ -290,7 +315,7 @@ if __name__ == '__main__':
         
     print ()
     print ('-=' * 10)
-    nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()), test_data = test_images, test_labels = test_labels_one_hot)
+    nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()), test_data = test_images, test_labels = test_labels_one_hot, batch_size = batch_size)
     nn_street_light.final_run()
     
     # #============= VALIDATION PART ========================================
