@@ -136,7 +136,7 @@ class book_sample(object):
                     weights_1_2 += self.alpha * layer_1.T.dot(layer_2_delta)
                     weights_0_1 += self.alpha * layer_0.T.dot(layer_1_delta)
                     
-            if(j%10 == 0):
+            if(j % 10 == 0):
                 test_error = 0.0
                 test_correct_cnt = 0
 
@@ -195,6 +195,7 @@ class nn_street_light(object):
 
         mini-batched stochastic gradient descent, need to assign the batch size
         '''
+        
         for j in range(self.iterations): 
             layer2_error = 0.0
             correct_cnt = 0
@@ -219,7 +220,7 @@ class nn_street_light(object):
 
                     # get the grad with multiple output
                     grad_1_2 = np.dot(delta.reshape(self.layer3_feat, self.batch_size), pre_layer1.reshape(self.batch_size, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
-                
+                    print (grad_1_2.min(), grad_1_2.max())
 
                     layer_1_delta = np.multiply(np.dot(delta.reshape(self.batch_size, self.layer3_feat), self.weights_1_2), relu2deriv(pre_layer1))
                     
@@ -229,9 +230,9 @@ class nn_street_light(object):
                     grad_0_1 = np.dot(self.input[batch_start : batch_end, :].reshape(self.layer1_feat, self.batch_size), layer_1_delta)
 
                     self.weights_1_2 -= self.alpha * grad_1_2
-                    # print (self.weights_1_2.shape)
-                    # print (self.weights_0_1.shape)
                     self.weights_0_1 -= self.alpha * grad_0_1.T
+                    
+                    break
                 
                 
 
@@ -254,9 +255,9 @@ class nn_street_light(object):
                 print (' Train-Error: {terr:.3f}; Train-Correct: {tcorr:.3f}'.format(terr = layer2_error / (batch_end + 1), tcorr = correct_cnt / (batch_end + 1)))
 
                 
-
-            np.save('mnist_weights_0_1.npy', self.weights_0_1) 
-            np.save('mnist_weights_1_2.npy', self.weights_1_2) 
+            # # save the weights for the validation check
+            # np.save('mnist_weights_0_1.npy', self.weights_0_1) 
+            # np.save('mnist_weights_1_2.npy', self.weights_1_2) 
 
             if j > 20:
                 break
@@ -381,6 +382,12 @@ if __name__ == '__main__':
     
     book_sample = book_sample(images, labels_one_hot, alpha, hidden_size, weights_0_1 = weights_0_1.copy(), weights_1_2 = weights_1_2.copy(), iterations = iterations, dropout_mask = dropout_mask.copy())
     book_sample.process_mnist_batch()
+
+    # # ============= COMPARE THE SOME RANDOM PART ========================================
+    # print (sum(sum(book_sample.dropout_mask == nn_street_light.dropout_mask)) == dropout_mask.shape[0] * dropout_mask.shape[1])
+
+    # print (sum(sum(book_sample.weights_1_2 == nn_street_light.weights_1_2.T)) == book_sample.weights_1_2.shape[0] * book_sample.weights_1_2.shape[1])
+    
 
 
     # till page 147 for the first two layer nn
