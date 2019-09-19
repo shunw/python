@@ -16,6 +16,16 @@ def relu(x):
 def relu2deriv(output): 
     return output >= 0
 
+def tanh(x): 
+    return np.tanh(x)
+
+def tanh2deriv(output): 
+    return 1 - np.power(output, 2)
+
+def softmax(x): 
+    temp = np.exp(x)
+    return temp / np.sum(temp, axis = 1, keepdims = True)
+
 def conv2hotlabel(labels):
     '''
     this is to convert to one-hot-label. for instance, if labels have number from 0-9, then the one-hot-label has 10 features. 
@@ -218,7 +228,7 @@ class nn_street_light(object):
                 batch_start = r * self.batch_size
                 batch_end = (r + 1) * self.batch_size
                 
-                pre_layer1 = relu(np.dot(self.input[batch_start : batch_end, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
+                pre_layer1 = tanh(np.dot(self.input[batch_start : batch_end, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
                 
                 
                 self.dropout_mask = np.random.randint(2, size = pre_layer1.shape)
@@ -227,41 +237,45 @@ class nn_street_light(object):
 
                 if self.dropout_mask.any():
                     pre_layer1 *= self.dropout_mask * 2
-                pre_layer2 = np.dot(pre_layer1, np.transpose(self.weights_1_2)) # [1, 40] * [40, 10] => [1, 10]
+                pre_layer2 = softmax(np.dot(pre_layer1, np.transpose(self.weights_1_2))) # [1, 40] * [40, 10] => [1, 10]
                 
                 layer2_error += np.sum(np.power(pre_layer2 - self.target[batch_start : batch_end], 2))
                 
                 correct_cnt += np.sum(np.argmax(pre_layer2, axis = 1) == np.argmax(self.target[batch_start : batch_end], axis = 1))
 
                 for k in range(self.batch_size): 
-                    delta = (pre_layer2 - self.target[batch_start : batch_end])/ self.batch_size # [1, 10]
+                    delta = (pre_layer2 - self.target[batch_start : batch_end])/ (self.batch_size * pre_layer2.shape[0]) # [1, 10]
 
                     # get the grad with multiple output
                     # print (delta.shape)
-                    grad_1_2 = np.dot(np.transpose(delta), pre_layer1.reshape(self.batch_size, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
-                    
-                    # print ('wendy layer_1: {}'.format(pre_layer1))
-                    # print ('wendy weight12: {}'.format(self.weights_1_2))
+                
+                ##
+                # DIFFERENT PLACE in chap 8 and chap 9
+                ##
+                grad_1_2 = np.dot(np.transpose(delta), pre_layer1.reshape(self.batch_size, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
+                
+                # print ('wendy layer_1: {}'.format(pre_layer1))
+                # print ('wendy weight12: {}'.format(self.weights_1_2))
 
-                    # print ('layer2_output: {}'.format(np.argmax(pre_layer2, axis = 1)))
-                    # print ('error: {:.3f}'.format(layer2_error))
-                    # print ('grad_1_2 min: {:.3f}; grad_1_2 max: {:.3f}'.format(grad_1_2.min(), grad_1_2.max()))
-                    # print ('wendy grad_1_2: {}'.format(grad_1_2))
-                    
+                # print ('layer2_output: {}'.format(np.argmax(pre_layer2, axis = 1)))
+                # print ('error: {:.3f}'.format(layer2_error))
+                # print ('grad_1_2 min: {:.3f}; grad_1_2 max: {:.3f}'.format(grad_1_2.min(), grad_1_2.max()))
+                # print ('wendy grad_1_2: {}'.format(grad_1_2))
+                
 
-                    layer_1_delta = np.multiply(np.dot(delta.reshape(self.batch_size, self.layer3_feat), self.weights_1_2), relu2deriv(pre_layer1))
-                    
-                    if self.dropout_mask.any():
-                        layer_1_delta *= self.dropout_mask
+                layer_1_delta = np.multiply(np.dot(delta.reshape(self.batch_size, self.layer3_feat), self.weights_1_2), tanh2deriv(pre_layer1))
+                
+                if self.dropout_mask.any():
+                    layer_1_delta *= self.dropout_mask
 
-                    # print ('wendy delta: {}'.format(layer_1_delta))
-                    
-                    grad_0_1 = np.dot(np.transpose(self.input[batch_start : batch_end, :]), layer_1_delta)
-                    # print ('wendy grad_0_1: {}'.format(grad_0_1))
-                    self.weights_1_2 -= self.alpha * grad_1_2
-                    self.weights_0_1 -= self.alpha * grad_0_1.T
-                    
-                    # break
+                # print ('wendy delta: {}'.format(layer_1_delta))
+                
+                grad_0_1 = np.dot(np.transpose(self.input[batch_start : batch_end, :]), layer_1_delta)
+                # print ('wendy grad_0_1: {}'.format(grad_0_1))
+                self.weights_1_2 -= self.alpha * grad_1_2
+                self.weights_0_1 -= self.alpha * grad_0_1.T
+                
+                # break
                 
                 
                 weights_ls = list([self.weights_0_1.copy(), self.weights_1_2.copy()])
@@ -277,7 +291,7 @@ class nn_street_light(object):
                 # print (err_cnt_ls)
 
                 print ('wendy I == {}'.format(j))
-                print (' Test-Error: {err:.3f}; Test-Correct: {corr:.3f}; Train-Error: {terr:.3f}; Train-Correct: {tcorr:.3f}'.format(err = err_cnt_ls[0], corr = err_cnt_ls[1], terr = layer2_error / (batch_end + 1), tcorr = correct_cnt / (batch_end + 1)))
+                print (' Test-Correct: {corr:.3f}; Train-Correct: {tcorr:.3f}'.format(corr = err_cnt_ls[1],  tcorr = correct_cnt / (batch_end + 1)))
 
                 # print (' Train-Error: {terr:.3f}; Train-Correct: {tcorr:.3f}'.format(terr = layer2_error / (len(self.input)), tcorr = correct_cnt / (len(self.input))))
 
@@ -329,7 +343,7 @@ class validation_nn():
 
     def validate_test_data(self): 
         correct_cnt = 0
-        layer_1 = relu(np.dot(self.test_data, np.transpose(self.weights_0_1))) # m * 40
+        layer_1 = tanh(np.dot(self.test_data, np.transpose(self.weights_0_1))) # m * 40
         layer_2 = np.dot(layer_1, np.transpose(self.weights_1_2)) # m * 10
         test_error = np.sum(np.power(layer_2 - self.test_labels, 2))
 
@@ -369,7 +383,7 @@ if __name__ == '__main__':
     with gzip.open(mnist_data_path, "rb") as f:
         ((x_train, y_train), (x_valid, y_valid), _) = pickle.load(f, encoding="latin-1")
 
-    alpha = .001
+    alpha = 2
     iterations = 300
     hidden_size = 100
     pixels_per_image = 784
@@ -384,7 +398,7 @@ if __name__ == '__main__':
     labels_one_hot = conv2hotlabel(labels).copy()
 
     # align the random part    
-    weights_0_1 = .2 * np.random.random((images.shape[1], hidden_size)) - .1
+    weights_0_1 = .02 * np.random.random((images.shape[1], hidden_size)) - .01
     weights_1_2 = .2 * np.random.random((hidden_size, labels_one_hot.shape[1])) - .1
 
     dropout_mask = np.random.randint(2,size=(batch_size, hidden_size))
@@ -468,5 +482,18 @@ notice:
 
     2. conflicting pressure: regularization is advantageous because if a weight has equal pressure upward and donward, it isn't good for anything. 
         
-        
+6. initial weights for different activation function 
+    
+    1. relu: weights between -.1 and .1
+
+    2. tanh: weights between -.01 and .01
+
+7. error calculation for different activation function 
+
+    1. softmax: cross entropy
+
+??? QUESTION???
+
+1. why the mini-batch loop is different in the page 175 and the page 159
+
 '''
