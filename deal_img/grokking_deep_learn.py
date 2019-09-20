@@ -26,6 +26,11 @@ def softmax(x):
     temp = np.exp(x)
     return temp / np.sum(temp, axis = 1, keepdims = True)
 
+def get_image_section(layer, row_from, row_to, col_from, col_to): 
+    sub_section = layer[:, row_from : row_to, col_from : col_to]
+    # print (sub_section.shape)
+    return sub_section.reshape(-1, 1, row_to - row_from, col_to - col_from)
+
 def conv2hotlabel(labels):
     '''
     this is to convert to one-hot-label. for instance, if labels have number from 0-9, then the one-hot-label has 10 features. 
@@ -185,7 +190,7 @@ class nn_street_light(object):
     '''
     only for one layer of hidden layer. totally three layer, the other two is one input layer, and the other is output layer. 
     '''
-    def __init__(self, input, target, hidden_size, alpha, iterations, weights_0_1, weights_1_2, error_method = 'sqr_error', test_data = None, test_labels = None, batch_size = 1, dropout_mask = None):
+    def __init__(self, input, target, hidden_size, alpha, iterations, weights_0_1, weights_1_2, error_method = 'sqr_error', test_data = None, test_labels = None, batch_size = 1, dropout_mask = None, kernel_cols = None, kernel_rows = None, num_kernels = None):
         self.input = input
         self.target = target
         self.hidden_size = hidden_size
@@ -208,6 +213,9 @@ class nn_street_light(object):
 
         self.dropout_mask = dropout_mask
         
+        self.kernel_cols = kernel_cols
+        self.kernel_rows = kernel_rows
+        self.num_kernels = num_kernels
 
     def nn_forward_back_pp_3(self): 
         '''
@@ -324,11 +332,51 @@ class nn_street_light(object):
                     error_for_all_lights += error
                 print ('Error: {all_lights}'.format(all_lights = error_for_all_lights))
             print (self.weights)
-            
+
+    def nn_w_kernel(self):      
+        '''
+        this is just for mnist dataset due to some shape parameter is hard coding. 
+        '''     
+        input_rows = self.input.shape[1] ** .5
+        input_cols = self.input.shape[1] ** .5
+        hidden_size = ((input_rows - self.kernel_rows) * (input_cols - self.kernel_cols)) * self.num_kernels
+
+        kernels = .02 * np.random.random((self.kernel_rows * self.kernel_cols, self.num_kernels)) - .01
+        weights_1_2 = .2 * np.random.random((hidden_size, num_labels)) - .1
+
+        for j in range((self.iterations)): 
+            correct_cnt = 0
+            for i in range((int(len(self.input) / self.batch_size))):
+                batch_start = i * self.batch_size
+                batch_end = (i + 1) * self.batch_size
+        
+                self.layer_0 = self.input[batch_start: batch_end]
+                
+                self.layer_0 = self.layer_0.reshape(self.layer_0.shape[0], input_rows, input_cols)
+        
+        sects = list()
+        for row_start in range(self.layer_0.shape[1] - kernel_rows + 1): 
+            for col_start in range(self.layer_0.shape[2] - self.kernel_cols + 1): 
+                sect = get_image_section(self.layer_0, row_start, row_start + kernel_rows, col_start, col_start + self.kernel_cols)
+                # print (sect.shape)
+                sects.append(sect)
+
+            #     break
+            # break
+        expanded_input = np.concatenate(sects, axis = 1)
+        es = expanded_input.shape
+        flattened_input = expanded_input.reshape(es[0] * es[1], -1)
+        print (flattened_input.shape)
+
+        kernel_output = np.dot(flattened_input, kernels)
+        print (kernel_output.shape)
+
+    
+
     def final_run(self): 
         # self.forword_pp()
         # self.cost_cal()
-        self.nn_forward_back_pp_3()
+        self.nn_w_kernel()
         
 class validation_nn(): 
     '''
@@ -356,6 +404,8 @@ class validation_nn():
 
     def final_run(self): 
         self.validate_test_data()
+
+
 
 if __name__ == '__main__': 
     streetlights = np.array([[1, 0, 1], 
@@ -389,7 +439,11 @@ if __name__ == '__main__':
     pixels_per_image = 784
     label_feat = 10
     pick_sample = 1000
-    batch_size = 100
+    batch_size = 128
+
+    kernel_rows = 3
+    kernel_cols = 3
+    num_kernels = 16
 
     images, labels = (x_train[:pick_sample], y_train[:pick_sample]) # .reshape(pick_sample, pixels_per_image)
     test_images, test_labels = (x_valid, y_valid)
@@ -406,7 +460,7 @@ if __name__ == '__main__':
         
     print ()
     print ('-=' * 10)
-    nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()), test_data = test_images, test_labels = test_labels_one_hot, batch_size = batch_size)
+    nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()), test_data = test_images, test_labels = test_labels_one_hot, batch_size = batch_size, kernel_cols = kernel_cols, kernel_rows = kernel_rows, num_kernels = num_kernels)
     nn_street_light.final_run()
     
     # #============= VALIDATION PART ========================================
@@ -432,7 +486,7 @@ if __name__ == '__main__':
     
 
 
-    # till page 162 for the first two layer nn
+    # till page 183 for the first two layer nn
         # book samples' label is to use the one_hot_labels, which has 10 column represent 10 number position. 
 
         # would you please try to use the neural number as the label.
