@@ -337,12 +337,14 @@ class nn_street_light(object):
         '''
         this is just for mnist dataset due to some shape parameter is hard coding. 
         '''     
-        input_rows = self.input.shape[1] ** .5
-        input_cols = self.input.shape[1] ** .5
-        hidden_size = ((input_rows - self.kernel_rows) * (input_cols - self.kernel_cols)) * self.num_kernels
+        input_rows = int(self.input.shape[1] ** .5)
+        input_cols = int(self.input.shape[1] ** .5)
+        hidden_size = ((input_rows - self.kernel_rows + 1) * (input_cols - self.kernel_cols + 1)) * self.num_kernels
+        num_labels = self.target.shape[1]
 
         kernels = .02 * np.random.random((self.kernel_rows * self.kernel_cols, self.num_kernels)) - .01
-        weights_1_2 = .2 * np.random.random((hidden_size, num_labels)) - .1
+        # print (hidden_size)
+        weights_1_2 = .2 * np.random.random((int(hidden_size), num_labels)) - .1
 
         for j in range((self.iterations)): 
             correct_cnt = 0
@@ -351,27 +353,32 @@ class nn_street_light(object):
                 batch_end = (i + 1) * self.batch_size
         
                 self.layer_0 = self.input[batch_start: batch_end]
-                
                 self.layer_0 = self.layer_0.reshape(self.layer_0.shape[0], input_rows, input_cols)
         
-        sects = list()
-        for row_start in range(self.layer_0.shape[1] - kernel_rows + 1): 
-            for col_start in range(self.layer_0.shape[2] - self.kernel_cols + 1): 
-                sect = get_image_section(self.layer_0, row_start, row_start + kernel_rows, col_start, col_start + self.kernel_cols)
-                # print (sect.shape)
-                sects.append(sect)
+                sects = list()
+                for row_start in range(self.layer_0.shape[1] - kernel_rows + 1): 
+                    for col_start in range(self.layer_0.shape[2] - self.kernel_cols + 1): 
+                        sect = get_image_section(self.layer_0, row_start, row_start + self.kernel_rows, col_start, col_start + self.kernel_cols)
+                        # print (sect.shape)
+                        sects.append(sect)
 
-            #     break
-            # break
-        expanded_input = np.concatenate(sects, axis = 1)
-        es = expanded_input.shape
-        flattened_input = expanded_input.reshape(es[0] * es[1], -1)
-        print (flattened_input.shape)
+                        break
+                    break
+                expanded_input = np.concatenate(sects, axis = 1)
+                # print (expanded_input.shape)
+                es = expanded_input.shape
+                flattened_input = expanded_input.reshape(es[0] * es[1], -1)
+                # print (flattened_input.shape)
+                # print (kernels.shape)
 
-        kernel_output = np.dot(flattened_input, kernels)
-        print (kernel_output.shape)
+                kernel_output = np.dot(flattened_input, kernels)
+                print (kernel_output.shape)
+                print (hidden_size)
+                print (weights_1_2.shape)
 
-    
+                break
+            
+            break
 
     def final_run(self): 
         # self.forword_pp()
