@@ -536,7 +536,7 @@ if __name__ == '__main__':
     
 
 
-    # till page 183 for the first two layer nn
+    # till page 188 for the first two layer nn
         # book samples' label is to use the one_hot_labels, which has 10 column represent 10 number position. 
 
         # would you please try to use the neural number as the label.
