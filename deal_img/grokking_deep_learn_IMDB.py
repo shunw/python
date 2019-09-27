@@ -10,6 +10,9 @@ np.random.seed(1)
 def sigmoid(x): 
     return 1 / (1 + np.exp(-x))
 
+def sigmoid2dev(output): 
+    return output * (1 - output)
+
 class imdb_analysis(object): 
     def __init__(self): 
         pass
@@ -78,20 +81,28 @@ class imdb_analysis(object):
             for i in range(self.input_qty - 1000): 
 
                 x, y = (self.input_dataset[i], self.target_dataset[i])
-                # print (x[0])
-                # print (weights_0_1[x[0]])
-                # print ('= - = ' * 10 )
-                # print (weights_0_1[65027])
-                # print ('= - = ' * 10 )
-                # print (weights_0_1[x])
+                
                 layer_1 = sigmoid(np.sum(weights_0_1[x], axis = 0))
                 
                 layer_2 = sigmoid(np.dot(layer_1, weights_1_2))
 
                 # break
                 layer_2_delta = layer_2 - y
-                layer_1_delta = np.dot(layer_2_delta, weights_1_2)
-            break
+                layer_1_delta = np.dot(layer_2_delta, np.transpose(weights_1_2))
+
+                weights_0_1[x] -= layer_1_delta * alpha
+                weights_1_2 -= np.outer(layer_1, layer_2_delta) * alpha
+
+                if (np.abs(layer_2_delta) < .5): 
+                    correct += 1
+                total += 1
+
+            if i % 10 == 9: 
+                progress = i/ float(self.input_qty) *100
+            
+            print ('Iter: {iter}; Progress: {progress:.3f} %; Training Accuracy: {acc:.3f} %'.format(iter = iter, progress = progress, acc = correct/ float(total) * 100))
+                
+            # break
 
     def final_run(self): 
         self.imdb_dataset_prepare()
