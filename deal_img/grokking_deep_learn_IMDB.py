@@ -100,8 +100,22 @@ class imdb_analysis(object):
             if i % 10 == 9: 
                 progress = i/ float(self.input_qty) *100
             
+        
             print ('Iter: {iter}; Progress: {progress:.3f} %; Training Accuracy: {acc:.3f} %'.format(iter = iter, progress = progress, acc = correct/ float(total) * 100))
-                
+
+        correct, total = (0, 0)            
+        for i in range(len(self.input_dataset) - 1000, len(self.input_dataset)): 
+
+            x = self.input_dataset[i]        
+            y = self.target_dataset[i]
+
+            layer_1 = sigmoid(np.sum(weights_0_1[x], axis = 0))
+            layer_2 = sigmoid(np.dot(layer_1, weights_1_2))
+
+            if np.abs(layer_2 - y) < .5: 
+                correct += 1
+            total += 1
+        print ('Test Accuracy: {}'.format(correct/ float(total)))
             # break
 
     def final_run(self): 
