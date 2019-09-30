@@ -4,8 +4,12 @@ import pickle
 import os.path
 import os
 import sys
+from collections import Counter
+import math
 
 np.random.seed(1)
+
+
 
 def sigmoid(x): 
     return 1 / (1 + np.exp(-x))
@@ -71,8 +75,8 @@ class imdb_analysis(object):
         alpha, iterations = (.01, 2)
         hidden_size = 100
 
-        weights_0_1 = .2 * np.random.random((len(self.vocab), hidden_size)) - .1
-        weights_1_2 = .2 * np.random.random((hidden_size, 1)) - .1
+        self.weights_0_1 = .2 * np.random.random((len(self.vocab), hidden_size)) - .1
+        self.weights_1_2 = .2 * np.random.random((hidden_size, 1)) - .1
 
         correct, total = (0, 0)
 
@@ -82,26 +86,41 @@ class imdb_analysis(object):
 
                 x, y = (self.input_dataset[i], self.target_dataset[i])
                 
-                layer_1 = sigmoid(np.sum(weights_0_1[x], axis = 0))
+                layer_1 = sigmoid(np.sum(self.weights_0_1[x], axis = 0))
+                # print (layer_1.shape)
                 
-                layer_2 = sigmoid(np.dot(layer_1, weights_1_2))
+                layer_2 = sigmoid(np.dot(layer_1, self.weights_1_2))
 
-                # break
+                # no sigmoid2dev =========================
                 layer_2_delta = layer_2 - y
-                layer_1_delta = np.dot(layer_2_delta, np.transpose(weights_1_2))
+                layer_1_delta = np.dot(layer_2_delta, np.transpose(self.weights_1_2))
 
-                weights_0_1[x] -= layer_1_delta * alpha
-                weights_1_2 -= np.outer(layer_1, layer_2_delta) * alpha
+                self.weights_0_1[x] -= layer_1_delta * alpha
+                self.weights_1_2 -= np.outer(layer_1, layer_2_delta) * alpha
+                # no sigmoid2dev =========================
+
+                # # with sigmoid2dev =========================
+                # layer_2_delta = (layer_2 - y) * sigmoid2dev(layer_2)
+                # layer_1_delta = np.dot(layer_2_delta, np.transpose(self.weights_1_2)) 
+                
+                # layer_1_delta = layer_1_delta * sigmoid2dev(layer_1)
+                
+
+                # self.weights_0_1[x] -= layer_1_delta * alpha
+                # self.weights_1_2 -= np.outer(layer_1, layer_2_delta) * alpha
+                # # with sigmoid2dev =========================
 
                 if (np.abs(layer_2_delta) < .5): 
                     correct += 1
                 total += 1
+                # break
 
             if i % 10 == 9: 
                 progress = i/ float(self.input_qty) *100
             
         
             print ('Iter: {iter}; Progress: {progress:.3f} %; Training Accuracy: {acc:.3f} %'.format(iter = iter, progress = progress, acc = correct/ float(total) * 100))
+            # break
 
         correct, total = (0, 0)            
         for i in range(len(self.input_dataset) - 1000, len(self.input_dataset)): 
@@ -109,22 +128,34 @@ class imdb_analysis(object):
             x = self.input_dataset[i]        
             y = self.target_dataset[i]
 
-            layer_1 = sigmoid(np.sum(weights_0_1[x], axis = 0))
-            layer_2 = sigmoid(np.dot(layer_1, weights_1_2))
+            layer_1 = sigmoid(np.sum(self.weights_0_1[x], axis = 0))
+            layer_2 = sigmoid(np.dot(layer_1, self.weights_1_2))
 
             if np.abs(layer_2 - y) < .5: 
                 correct += 1
             total += 1
         print ('Test Accuracy: {}'.format(correct/ float(total)))
+
+    def similar(self, target = 'beautiful'): 
+        target_index = self.word2index[target]
+        scores = Counter()
+        for word, index in self.word2index.items(): 
+            raw_difference = self.weights_0_1[index] - self.weights_0_1[target_index]
+            # print (raw_difference[0])
+            squared_difference = raw_difference * raw_difference
+            scores[word] = -math.sqrt(sum(squared_difference))
             # break
+        print (scores.most_common(10))
+        return scores.most_common(10)
 
     def final_run(self): 
         self.imdb_dataset_prepare()
         self.nn_process()
+        self.similar()
 
 if __name__ == '__main__': 
     imdb_analysis = imdb_analysis()
     imdb_analysis.final_run()
     
-# till 193
+# till 200
     
