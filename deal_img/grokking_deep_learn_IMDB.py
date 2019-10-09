@@ -6,9 +6,10 @@ import os
 import sys
 from collections import Counter
 import math
+import random
 
 np.random.seed(1)
-
+random.seed(1)
 
 
 def sigmoid(x): 
@@ -153,9 +154,102 @@ class imdb_analysis(object):
         self.nn_process()
         self.similar()
 
-if __name__ == '__main__': 
-    imdb_analysis = imdb_analysis()
-    imdb_analysis.final_run()
+class imdb_filling_word(object): 
+    def __init__(self): 
+        pass
     
-# till 200
+    def imdb_dataset_prepare(self): 
+        f = open('./data/IMDB/reviews.txt')
+        raw_reviews = f.readlines()
+        f.close()
+
+        tokens = list(map(lambda x: x.split(' '), raw_reviews))
+        wordcnt = Counter()
+        for sent in tokens: 
+            for word in sent: 
+                wordcnt[word] -= 1
+                # wordcnt[word] += 1
+        
+        # get the most/ less common word in each reviews/ 
+        self.vocab = list(set(map(lambda x: x[0], wordcnt.most_common())))
+
+        self.word2index = {}
+        for i, word in enumerate(self.vocab): 
+            self.word2index[word] = i
+
+        self.concatenated = list()
+        self.input_dataset = list()
+        for sent in tokens: 
+            sent_indices = list()
+
+            for word in sent: 
+                try: 
+                    sent_indices.append(self.word2index[word])
+                    self.concatenated.append(self.word2index[word])
+                except: 
+                    ''
+            self.input_dataset.append(sent_indices)
+
+        self.concatenated = np.array(self.concatenated)
+        random.shuffle(self.input_dataset)
+
+    def nn_process(self): 
+        self.alpha, self.iterations = (.05, 2)
+        self.hidden_size, self.window, self.negative = (50, 2, 5)
+        
+        self.weights_0_1 = (np.random.rand(len(self.vocab), self.hidden_size) - .5) * .2
+        self.weights_1_2 = np.random.rand(len(self.vocab), self.hidden_size) * 0
+
+        self.layer_2_target = np.zeros(self.negative + 1)
+        self.layer_2_target[0] = 1
+
+        
+        for rev_i, review in enumerate(self.input_dataset * self.iterations): 
+            for target_i in range(len(review)): 
+                
+                # ? what is the target_samples for?         
+                target_samples = [review[target_i]] + list(self.concatenated[(np.random.rand(self.negative) * len(self.concatenated)).astype('int').tolist()])
+
+                left_context = review[max(0, target_i - self.window): target_i]
+                right_context = review[target_i: min(len(review), target_i + self.window)]
+
+                layer_1 = np.mean(self.weights_0_1[left_context + right_context], axis = 0)
+                layer_2 = sigmoid(np.dot(layer_1, self.weights_1_2[target_samples].T))
+                layer_2_delta = layer_2 - self.layer_2_target
+                layer_1_delta = np.dot(layer_2_delta, self.weights_1_2[target_samples])
+
+                self.weights_0_1[left_context + right_context] -= layer_1_delta * self.alpha
+                self.weights_1_2[target_samples] -= np.outer(layer_2_delta, layer_1) * self.alpha
+            
+            # if rev_i % 250 == 0:
+            #     print ()
+            #     print ('Progress: {progress} {simi_terr}'.format(progress = rev_i/float(len(self.input_dataset) * self.iterations), simi_terr = self.similar('terrible')))
+        print ('*=*-' * 20)    
+        print ('Progress: {progress} {simi_terr}'.format(progress = rev_i/float(len(self.input_dataset) * self.iterations), simi_terr = self.similar('terrible')))
+        
+    def similar(self, target = 'beautiful'): 
+        target_index = self.word2index[target]
+        scores = Counter()
+        for word, index in self.word2index.items(): 
+            raw_difference = self.weights_0_1[index] - self.weights_0_1[target_index]
+            # print (raw_difference[0])
+            squared_difference = raw_difference * raw_difference
+            scores[word] = -math.sqrt(sum(squared_difference))
+            # break
+        # print (scores.most_common(10))
+        return scores.most_common(10)
+
+
+    def final_run(self):
+        self.imdb_dataset_prepare()
+        self.nn_process()
+
+if __name__ == '__main__': 
+    # imdb_analysis = imdb_analysis()
+    # imdb_analysis.final_run()
+
+    fil_word = imdb_filling_word()
+    fil_word.final_run()
+    
+# till 202
     
