@@ -339,16 +339,19 @@ class nn_street_light(object):
                 print ('Error: {all_lights}'.format(all_lights = error_for_all_lights))
             print (self.weights)
 
+    
     def nn_w_kernel(self):      
         '''
         this is just for mnist dataset due to some shape parameter is hard coding. 
         '''     
-        input_rows = self.input.shape[1] ** .5
-        input_cols = self.input.shape[1] ** .5
-        hidden_size = ((input_rows - self.kernel_rows) * (input_cols - self.kernel_cols)) * self.num_kernels
+        input_rows = int(self.input.shape[1] ** .5)
+        input_cols = int(self.input.shape[1] ** .5)
+        hidden_size = ((input_rows - self.kernel_rows + 1) * (input_cols - self.kernel_cols + 1)) * self.num_kernels
+        num_labels = self.target.shape[1]
 
         kernels = .02 * np.random.random((self.kernel_rows * self.kernel_cols, self.num_kernels)) - .01
-        weights_1_2 = .2 * np.random.random((hidden_size, num_labels)) - .1
+        # print (hidden_size)
+        weights_1_2 = .2 * np.random.random((int(hidden_size), num_labels)) - .1
 
         for j in range((self.iterations)): 
             correct_cnt = 0
@@ -357,27 +360,74 @@ class nn_street_light(object):
                 batch_end = (i + 1) * self.batch_size
         
                 self.layer_0 = self.input[batch_start: batch_end]
-                
                 self.layer_0 = self.layer_0.reshape(self.layer_0.shape[0], input_rows, input_cols)
         
-        sects = list()
-        for row_start in range(self.layer_0.shape[1] - kernel_rows + 1): 
-            for col_start in range(self.layer_0.shape[2] - self.kernel_cols + 1): 
-                sect = get_image_section(self.layer_0, row_start, row_start + kernel_rows, col_start, col_start + self.kernel_cols)
-                # print (sect.shape)
-                sects.append(sect)
+                sects = list()
+                for row_start in range(self.layer_0.shape[1] - self.kernel_rows + 1): 
+                    for col_start in range(self.layer_0.shape[2] - self.kernel_cols + 1): 
+                        sect = get_image_section(self.layer_0, row_start, row_start + self.kernel_rows, col_start, col_start + self.kernel_cols)
+                        # print (sect.shape)
+                        sects.append(sect)
 
-            #     break
-            # break
-        expanded_input = np.concatenate(sects, axis = 1)
-        es = expanded_input.shape
-        flattened_input = expanded_input.reshape(es[0] * es[1], -1)
-        print (flattened_input.shape)
+                    #     break
+                    # break
+                expanded_input = np.concatenate(sects, axis = 1)
+                # print ('expaned_input shape: ', expanded_input.shape)
+                es = expanded_input.shape
+                flattened_input = expanded_input.reshape(es[0] * es[1], -1)
+                # print ('flattened_input shape: ', flattened_input.shape)
+                # print ('kernels shape: ', kernels.shape)
 
-        kernel_output = np.dot(flattened_input, kernels)
-        print (kernel_output.shape)
+                kernel_output = np.dot(flattened_input, kernels)
+                # print ('kernel_output shape: ', kernel_output.shape)
+                # print ('hidden_size: ', hidden_size)
+                # print ('weights12 shape: ', weights_1_2.shape)
 
-    
+                layer_1 = tanh(kernel_output.reshape(es[0], -1))
+                dropout_mask = np.random.randint(2, size = layer_1.shape)
+                
+                layer_1 *= dropout_mask * 2
+                # print ('layer1 shape: ', layer_1.shape)
+                layer_2 = softmax(np.dot(layer_1,weights_1_2))
+                # print ('layer2 shape: ', layer_2.shape)
+
+                correct_cnt += np.sum(np.argmax(self.target[batch_start: batch_end], axis = 1) == np.argmax(layer_2, axis = 1))
+
+                layer_2_delta = (self.target[batch_start: batch_end] - layer_2) / (batch_size * layer_2.shape[0])
+                layer_1_delta = np.dot(layer_2_delta, weights_1_2.T) * tanh2deriv(layer_1)
+                layer_1_delta *= dropout_mask
+
+                weights_1_2 += self.alpha * np.dot(layer_1.T, layer_2_delta)
+                L1d_reshape = layer_1_delta.reshape(kernel_output.shape)
+                k_update = np.dot(flattened_input.T, L1d_reshape)
+                kernels -= self.alpha * k_update
+
+            test_correct_cnt = 0
+            test_layer_0 = self.test_data.copy()
+            test_layer_0 = test_layer_0.reshape(test_layer_0.shape[0], input_rows, input_cols)
+
+            test_sects = list()
+            for row_start in range(test_layer_0.shape[1] - self.kernel_rows + 1): 
+                for col_start in range(test_layer_0.shape[2] - kernel_cols + 1): 
+                    sect = get_image_section(test_layer_0, row_start, row_start + self.kernel_rows, col_start, col_start + self.kernel_cols)
+                    test_sects.append(sect)
+            
+            test_expaned_input = np.concatenate(test_sects, axis = 1)
+            test_es = test_expaned_input.shape
+            # print ('test_es: ', test_es)
+            test_flattened_input = test_expaned_input.reshape(test_es[0] * test_es[1], -1)
+
+            test_kernel_output = np.dot(test_flattened_input, kernels)
+            # print ('test layer 1 shape: ', test_kernel_output.shape)
+            test_layer_1 = tanh(test_kernel_output.reshape(test_es[0], -1))
+            # print ('test layer 1 shape: ', test_layer_1.shape)
+            # print ('weight shape: ', weights_1_2.shape)
+            test_layer_2 = np.dot(test_layer_1, weights_1_2)
+            test_correct_cnt = np.sum(np.argmax(self.test_labels, axis = 1) == np.argmax(test_layer_2, axis = 1))
+            
+            if j % 10 == 0: 
+                print ('I == {}'.format(j))
+                print ('Test-Correct: {test_corr:.3f}; Train-Correct: {tcorr:.3f}'.format(test_corr = test_correct_cnt / (float(len(self.test_data))), tcorr = correct_cnt / (float(len(self.input)))))
 
     def final_run(self): 
         # self.forword_pp()
@@ -507,7 +557,7 @@ if __name__ == '__main__':
     
 
 
-    # till page 183 for the first two layer nn
+    # till page 188 for the first two layer nn
         # book samples' label is to use the one_hot_labels, which has 10 column represent 10 number position. 
 
         # would you please try to use the neural number as the label.
