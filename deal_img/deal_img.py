@@ -169,7 +169,33 @@ class photo_deal(object):
                     self.img[i, j] = (178, 178, 178)
         cv2.imshow('res', self.img)
         cv2.waitKey(0)
-        
+    
+    
+    def normal_sharpen(self, kernel): 
+        self.img = cv2.imread(self.fl_name)
+
+        # kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+
+        # applying the kernel to the input image
+        output = cv2.filter2D(self.img, -1, kernel)
+
+        # # displaying the difference in the input vs output
+        # # quits window if q is pressed
+        # # swithes between the two images when any ohter key is pressed
+        # quit = False
+        # while (not quit): 
+        #     cv2.imshow('image', self.img)
+        #     key = cv2.waitKey(0)
+        #     if (key == ord('q')):
+        #         quit = True
+        #         break; 
+        #     cv2.imshow('sharpened image', output)
+        #     key = cv2.waitKey(0)
+        #     if (key == ord('q')): 
+        #         quit = True
+        # cv2.destroyAllWindows()
+        cv2.imwrite('moon_sharpened.JPG', output)
+
 import operator
 
 def equalize(im):
@@ -186,43 +212,56 @@ def equalize(im):
             n = n + h[i+b]
     # map image through lookup table
     # print (im.layers)
-    # return im.point(lut*im.layers)
-    return im.point(lut*4)
+    return im.point(lut*im.layers)
+    # return im.point(lut*4)
 
 if __name__ == '__main__':
-    f_name = 'mhz.png'
-    # f_name = 'vivian.jpg'
-    f_name2 = 'mhz2.png'
+    # f_name = 'mhz.png'
+    # f_name3 = 'vivian.jpg'
+    # f_name2 = 'mhz2.png'
+    f_name3 = 'moon.jpg'
     
     # f_top = 50
     # f_bottom = 479
     # photo_crop = photo_deal(f_name, f_top, f_bottom)
     # photo_crop.crop_2_tw(300)
 
-    # change_bg = photo_deal(f_name)
+    # change_bg = photo_deal(f_name3)
     # change_bg.change_bg_id_white()
-    im_file1 = Image.open(f_name)
-    test1 = equalize(im_file1)
-    # Image.open(test)
+    # im_file1 = Image.open(f_name3)
+    # test1 = equalize(im_file1)
+    # # Image.open(test)
 
-    im_file2 = Image.open(f_name2)
-    test2 = equalize(im_file2)
+    # im_file2 = Image.open(f_name3)
+    # test2 = equalize(im_file2)
 
-    test1.show()
-    test2.show()
+    # test1.show()
+    # test2.show()
     
     '''
     this could make the image just in black and white with frames
     '''
     # https://stackoverflow.com/questions/10561222/how-do-i-equalize-contrast-brightness-of-images-using-opencv
-    img = cv2.imread(fl_name,0)
-    kernel1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
-    close = cv2.morphologyEx(img,cv2.MORPH_CLOSE,kernel1)
-    div = np.float32(img)/(close)
-    res = np.uint8(cv2.normalize(div,div,0,255,cv2.NORM_MINMAX))
-    cv2.imshow('res', res)
-    cv2.waitKey(0)
+    # img = cv2.imread(f_name3,0)
+    # kernel1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
+    # close = cv2.morphologyEx(img,cv2.MORPH_CLOSE,kernel1)
+    # div = np.float32(img)/(close)
+    # res = np.uint8(cv2.normalize(div,div,0,255,cv2.NORM_MINMAX))
+    # cv2.imshow('res', res)
+    # cv2.waitKey(0)
 
+    '''
+    this is to make the image sharpened
+    '''
+    sharpen_image = photo_deal(f_name3)
+    kernel_normal_sharpen = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+    kernel_edge_enhanced = np.array([[-1,-1,-1,-1,-1],
+                               [-1,2,2,2,-1],
+                               [-1,2,8,2,-1],
+                               [-2,2,2,2,-1],
+                               [-1,-1,-1,-1,-1]])/8.0
+    kernel_excessive = np.array([[1,1,1], [1,-7,1], [1,1,1]])
+    sharpen_image.normal_sharpen(kernel_edge_enhanced)
 
         
     

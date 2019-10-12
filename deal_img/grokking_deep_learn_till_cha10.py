@@ -138,7 +138,7 @@ class book_sample(object):
                 layer_0 = self.images[batch_start:batch_end]
                 layer_1 = relu(np.dot(layer_0,weights_0_1))
                 
-                # dropout_mask = np.random.randint(2,size=layer_1.shape)
+                dropout_mask = np.random.randint(2,size=layer_1.shape)
                 layer_1 *= self.dropout_mask * 2
                 
                 layer_2 = np.dot(layer_1,weights_1_2)
@@ -159,31 +159,31 @@ class book_sample(object):
                     # print ('bk delta: {}'.format(layer_1_delta))
                     weights_1_2 += self.alpha * layer_1.T.dot(layer_2_delta)
                     weights_0_1 += self.alpha * layer_0.T.dot(layer_1_delta)
-                    break
-                break
+                #     break
+                # break
                     
             if(j % 10 == 0):
                 test_error = 0.0
                 test_correct_cnt = 0
 
-                # for i in range(len(test_images)):
-                #     layer_0 = test_images[i:i+1]
-                #     layer_1 = relu(np.dot(layer_0,weights_0_1))
-                #     layer_2 = np.dot(layer_1, weights_1_2)
+                for i in range(len(test_images)):
+                    layer_0 = test_images[i:i+1]
+                    layer_1 = relu(np.dot(layer_0,weights_0_1))
+                    layer_2 = np.dot(layer_1, weights_1_2)
 
-                #     test_error += np.sum((test_labels[i:i+1] - layer_2) ** 2)
-                #     test_correct_cnt += int(np.argmax(layer_2) == np.argmax(test_labels[i:i+1]))
+                    test_error += np.sum((test_labels[i:i+1] - layer_2) ** 2)
+                    test_correct_cnt += int(np.argmax(layer_2) == np.argmax(test_labels[i:i+1]))
 
                 sys.stdout.write("\n" + \
                                 "bk I:" + str(j) + \
-                                # " Test-Err:" + str(test_error/ float(len(test_images)))[0:5] +\
-                                # " Test-Acc:" + str(test_correct_cnt/ float(len(test_images)))+\
+                                " Test-Err:" + str(test_error/ float(len(test_images)))[0:5] +\
+                                " Test-Acc:" + str(test_correct_cnt/ float(len(test_images)))+\
                                 " Train-Err:" + str(error/ float(len(self.images)))[0:5] +\
                                 " Train-Acc:" + str(correct_cnt/ float(len(self.images))))
 
-            break
-            if j > 20:
-                break
+            # break
+            # if j > 20:
+            #     break
 
     
 class nn_street_light(object): 
@@ -226,6 +226,9 @@ class nn_street_light(object):
 
         mini-batched stochastic gradient descent, need to assign the batch size
         '''
+        self.batch_size = 100
+        self.alpha = .001
+        self.iterations = 300
         
         for j in range(self.iterations): 
             layer2_error = 0.0
@@ -236,7 +239,7 @@ class nn_street_light(object):
                 batch_start = r * self.batch_size
                 batch_end = (r + 1) * self.batch_size
                 
-                pre_layer1 = tanh(np.dot(self.input[batch_start : batch_end, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
+                pre_layer1 = relu(np.dot(self.input[batch_start : batch_end, :], np.transpose(self.weights_0_1))) # [1, 784] * [784, 40] => [1, 40]
                 
                 
                 self.dropout_mask = np.random.randint(2, size = pre_layer1.shape)
@@ -245,43 +248,46 @@ class nn_street_light(object):
 
                 if self.dropout_mask.any():
                     pre_layer1 *= self.dropout_mask * 2
-                pre_layer2 = softmax(np.dot(pre_layer1, np.transpose(self.weights_1_2))) # [1, 40] * [40, 10] => [1, 10]
+                # pre_layer2 = softmax(np.dot(pre_layer1, np.transpose(self.weights_1_2))) # [1, 40] * [40, 10] => [1, 10]
+
+                pre_layer2 = np.dot(pre_layer1, np.transpose(self.weights_1_2)) # [1, 40] * [40, 10] => [1, 10]
                 
                 layer2_error += np.sum(np.power(pre_layer2 - self.target[batch_start : batch_end], 2))
                 
                 correct_cnt += np.sum(np.argmax(pre_layer2, axis = 1) == np.argmax(self.target[batch_start : batch_end], axis = 1))
 
                 for k in range(self.batch_size): 
-                    delta = (pre_layer2 - self.target[batch_start : batch_end])/ (self.batch_size * pre_layer2.shape[0]) # [1, 10]
+                    # delta = (pre_layer2 - self.target[batch_start : batch_end])/ (self.batch_size * pre_layer2.shape[0]) # [1, 10]
+                    delta = (pre_layer2 - self.target[batch_start : batch_end])/ (self.batch_size) # [1, 10]
 
                     # get the grad with multiple output
                     # print (delta.shape)
                 
-                ##
-                # DIFFERENT PLACE in chap 8 and chap 9
-                ##
-                grad_1_2 = np.dot(np.transpose(delta), pre_layer1.reshape(self.batch_size, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
-                
-                # print ('wendy layer_1: {}'.format(pre_layer1))
-                # print ('wendy weight12: {}'.format(self.weights_1_2))
+                    ##
+                    # DIFFERENT PLACE in chap 8 and chap 9
+                    ##
+                    grad_1_2 = np.dot(np.transpose(delta), pre_layer1.reshape(self.batch_size, self.layer2_feat)) # [10, 1] * [1, 40] => [10, 40]
+                    
+                    # print ('wendy layer_1: {}'.format(pre_layer1))
+                    # print ('wendy weight12: {}'.format(self.weights_1_2))
 
-                # print ('layer2_output: {}'.format(np.argmax(pre_layer2, axis = 1)))
-                # print ('error: {:.3f}'.format(layer2_error))
-                # print ('grad_1_2 min: {:.3f}; grad_1_2 max: {:.3f}'.format(grad_1_2.min(), grad_1_2.max()))
-                # print ('wendy grad_1_2: {}'.format(grad_1_2))
-                
+                    # print ('layer2_output: {}'.format(np.argmax(pre_layer2, axis = 1)))
+                    # print ('error: {:.3f}'.format(layer2_error))
+                    # print ('grad_1_2 min: {:.3f}; grad_1_2 max: {:.3f}'.format(grad_1_2.min(), grad_1_2.max()))
+                    # print ('wendy grad_1_2: {}'.format(grad_1_2))
+                    
 
-                layer_1_delta = np.multiply(np.dot(delta.reshape(self.batch_size, self.layer3_feat), self.weights_1_2), tanh2deriv(pre_layer1))
-                
-                if self.dropout_mask.any():
-                    layer_1_delta *= self.dropout_mask
+                    layer_1_delta = np.multiply(np.dot(delta.reshape(self.batch_size, self.layer3_feat), self.weights_1_2), tanh2deriv(pre_layer1))
+                    
+                    if self.dropout_mask.any():
+                        layer_1_delta *= self.dropout_mask
 
-                # print ('wendy delta: {}'.format(layer_1_delta))
-                
-                grad_0_1 = np.dot(np.transpose(self.input[batch_start : batch_end, :]), layer_1_delta)
-                # print ('wendy grad_0_1: {}'.format(grad_0_1))
-                self.weights_1_2 -= self.alpha * grad_1_2
-                self.weights_0_1 -= self.alpha * grad_0_1.T
+                    # print ('wendy delta: {}'.format(layer_1_delta))
+                    
+                    grad_0_1 = np.dot(np.transpose(self.input[batch_start : batch_end, :]), layer_1_delta)
+                    # print ('wendy grad_0_1: {}'.format(grad_0_1))
+                    self.weights_1_2 -= self.alpha * grad_1_2
+                    self.weights_0_1 -= self.alpha * grad_0_1.T
                 
                 # break
                 
@@ -426,7 +432,8 @@ class nn_street_light(object):
     def final_run(self): 
         # self.forword_pp()
         # self.cost_cal()
-        self.nn_w_kernel()
+        # self.nn_w_kernel()
+        self.nn_forward_back_pp_3()
         
 class validation_nn(): 
     '''
@@ -477,8 +484,8 @@ if __name__ == '__main__':
 
     # weights = np.array([.5, .48, -.7])
 
-    # mnist_data_path = '/Users/zhang/github/standford_ML/pytorch/data/mnist/mnist.pkl.gz'
-    mnist_data_path = './data/mnist/mnist.pkl.gz'
+    mnist_data_path = '/Users/zhang/github/standford_ML/pytorch/data/mnist/mnist.pkl.gz'
+    # mnist_data_path = './data/mnist/mnist.pkl.gz'
 
     with gzip.open(mnist_data_path, "rb") as f:
         ((x_train, y_train), (x_valid, y_valid), _) = pickle.load(f, encoding="latin-1")
@@ -504,14 +511,16 @@ if __name__ == '__main__':
     # align the random part    
     weights_0_1 = .02 * np.random.random((images.shape[1], hidden_size)) - .01
     weights_1_2 = .2 * np.random.random((hidden_size, labels_one_hot.shape[1])) - .1
-
+    
+    batch_size = 100
+    hidden_size = 100
     dropout_mask = np.random.randint(2,size=(batch_size, hidden_size))
-    #============= WENDY PART ========================================
+    # #============= WENDY PART ========================================
         
-    print ()
-    print ('-=' * 10)
-    nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()), test_data = test_images, test_labels = test_labels_one_hot, batch_size = batch_size, kernel_cols = kernel_cols, kernel_rows = kernel_rows, num_kernels = num_kernels)
-    nn_street_light.final_run()
+    # print ()
+    # print ('-=' * 10)
+    # nn_street_light = nn_street_light(input = images, target = labels_one_hot, hidden_size = hidden_size, alpha = alpha, iterations = iterations, weights_0_1 = np.transpose(weights_0_1.copy()), weights_1_2 = np.transpose(weights_1_2.copy()), test_data = test_images, test_labels = test_labels_one_hot, batch_size = batch_size, kernel_cols = kernel_cols, kernel_rows = kernel_rows, num_kernels = num_kernels)
+    # nn_street_light.final_run()
     
     # #============= VALIDATION PART ========================================
     # weights_ls = list()
@@ -522,12 +531,24 @@ if __name__ == '__main__':
     # validate_test = validation_nn(test_data = test_images, test_label = test_labels_one_hot, weights = weights_ls)
     # validate_test.final_run()
 
-    # # ============= BOOK SAMPLE PART ========================================
-    # print ()
-    # print ('-=' * 10)
+    # ============= BOOK SAMPLE PART ========================================
+    print ()
+    print ('-=' * 10)
     
-    # book_sample = book_sample(images, labels_one_hot, alpha, hidden_size, weights_0_1 = weights_0_1.copy(), weights_1_2 = weights_1_2.copy(), iterations = iterations, dropout_mask = dropout_mask.copy())
-    # book_sample.process_mnist_batch()
+    alpha = .001
+    iterations = 300
+    hidden_size = 100
+    pixels_per_image = 784
+    label_feat = 10
+    pick_sample = 1000
+    batch_size = 100
+
+    kernel_rows = 3
+    kernel_cols = 3
+    num_kernels = 16
+
+    book_sample = book_sample(images, labels_one_hot, alpha, hidden_size, weights_0_1 = weights_0_1.copy(), weights_1_2 = weights_1_2.copy(), iterations = iterations, dropout_mask = dropout_mask.copy())
+    book_sample.process_mnist_batch()
 
     # # ============= COMPARE THE SOME RANDOM PART ========================================
     # print (sum(sum(book_sample.dropout_mask == nn_street_light.dropout_mask)) == dropout_mask.shape[0] * dropout_mask.shape[1])
