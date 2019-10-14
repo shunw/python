@@ -198,28 +198,40 @@ class imdb_filling_word(object):
         self.hidden_size, self.window, self.negative = (50, 2, 5)
         
         self.weights_0_1 = (np.random.rand(len(self.vocab), self.hidden_size) - .5) * .2
-        self.weights_1_2 = np.random.rand(len(self.vocab), self.hidden_size) * 0
+        self.weights_1_2 = np.random.rand(len(self.vocab), self.hidden_size) * .2
 
         self.layer_2_target = np.zeros(self.negative + 1)
         self.layer_2_target[0] = 1
 
-        
+        # count = 0
         for rev_i, review in enumerate(self.input_dataset * self.iterations): 
             for target_i in range(len(review)): 
                 
                 # ? what is the target_samples for?         
+                # [当前review的当前轮单词，在concatenated里任选五个单词]
                 target_samples = [review[target_i]] + list(self.concatenated[(np.random.rand(self.negative) * len(self.concatenated)).astype('int').tolist()])
-
+                
+                # 以2-4个单词为范围，4个单词的话，left context就是左边两个，right context就是右边两个。有些边缘情况是，两边不相等，可能会出现一边没有单词，另外一边两个单词的情况
                 left_context = review[max(0, target_i - self.window): target_i]
                 right_context = review[target_i: min(len(review), target_i + self.window)]
+                
+                # print ()
+                # print ('count = {}'.format(count))
+                # print (target_samples)
+                # print (left_context + right_context)
 
+                # left_context + right_context 组成了一条 input data
                 layer_1 = np.mean(self.weights_0_1[left_context + right_context], axis = 0)
+                # ? weight_1_2 系数直接指向target samples，不清楚为何酱紫设计
                 layer_2 = sigmoid(np.dot(layer_1, self.weights_1_2[target_samples].T))
                 layer_2_delta = layer_2 - self.layer_2_target
                 layer_1_delta = np.dot(layer_2_delta, self.weights_1_2[target_samples])
 
                 self.weights_0_1[left_context + right_context] -= layer_1_delta * self.alpha
                 self.weights_1_2[target_samples] -= np.outer(layer_2_delta, layer_1) * self.alpha
+            #     count += 1
+            #     if count == 5: break
+            # break
             
             # if rev_i % 250 == 0:
             #     print ()
