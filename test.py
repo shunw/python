@@ -54,11 +54,43 @@ def wilson(clicks, impressions):
         return confidence(clicks, impressions)
  
 if __name__ == '__main__':
-    print (wilson(0,10))
+    # print (wilson(0,10))
     # print (wilson(2,10))
     # print (wilson(20,100))
     # print (wilson(200,1000))
- 
+    # z_value = -.7 * (2**.5) / .4
+    # print (z_value)
+    # z_value_p = st.norm.cdf(z_value)
+    # print (z_value_p/2)
+
+    p1 = .27
+    p2 = .35
+    p = .31
+    z_value = (p1 - p2)/ ((p *(1-p) * 2/200) ** .5)
+    z_value_p = st.norm.cdf(z_value)
+    
+    p1 = 33/300
+    p2 = 84/300
+    d = .10
+    divid = ((p1 * (1-p1) / 300 + p2 * (1-p2) / 300 )**.5)
+    z_value = (p2 - p1 - d)/ divid
+    
+    z_value_p = st.norm.cdf(z_value)
+    z_interval = st.norm.ppf(.95)
+    z_interval_lower = st.norm.ppf(.05)
+    
+    upper = z_interval * divid
+    lower = z_interval * -1 *divid
+    d_upper = p2 - p1 - upper
+    d_lower = p2 - p1 - lower
+    # print (d_lower, d_upper)
+
+    a = (1.1 - 0)**2 * .05
+    b = (1.1 - 1)**2 * .8 
+    c = (1.1 - 2)**2 * .15
+    print (a + b + c)
+    
+
 """    
 --------------------
 results:
