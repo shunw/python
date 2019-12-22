@@ -52,7 +52,17 @@ def wilson(clicks, impressions):
         return 0
     else:
         return confidence(clicks, impressions)
- 
+
+
+def trial_exp_inter(n, sum_xi, alpha = .05): 
+    # to check how to get the exponential interval
+    chi_sqrt_low = st.chi2.ppf(q = alpha/2, df = 2 * n )
+    chi_sqrt_high = st.chi2.ppf(q = 1 - alpha/2, df = 2 * n )
+    print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
+    print ( (2 * sum_xi) / chi_sqrt_low, (2 * sum_xi) / chi_sqrt_high)
+
+    
+
 if __name__ == '__main__':
     # print (wilson(0,10))
     # print (wilson(2,10))
@@ -63,32 +73,39 @@ if __name__ == '__main__':
     # z_value_p = st.norm.cdf(z_value)
     # print (z_value_p/2)
 
-    p1 = .27
-    p2 = .35
-    p = .31
-    z_value = (p1 - p2)/ ((p *(1-p) * 2/200) ** .5)
-    z_value_p = st.norm.cdf(z_value)
+    # p1 = .27
+    # p2 = .35
+    # p = .31
+    # z_value = (p1 - p2)/ ((p *(1-p) * 2/200) ** .5)
+    # z_value_p = st.norm.cdf(z_value)
     
-    p1 = 33/300
-    p2 = 84/300
-    d = .10
-    divid = ((p1 * (1-p1) / 300 + p2 * (1-p2) / 300 )**.5)
-    z_value = (p2 - p1 - d)/ divid
+    # p1 = 33/300
+    # p2 = 84/300
+    # d = .10
+    # divid = ((p1 * (1-p1) / 300 + p2 * (1-p2) / 300 )**.5)
+    # z_value = (p2 - p1 - d)/ divid
     
-    z_value_p = st.norm.cdf(z_value)
-    z_interval = st.norm.ppf(.95)
-    z_interval_lower = st.norm.ppf(.05)
+    # z_value_p = st.norm.cdf(z_value)
+    # z_interval = st.norm.ppf(.95)
+    # z_interval_lower = st.norm.ppf(.05)
     
-    upper = z_interval * divid
-    lower = z_interval * -1 *divid
-    d_upper = p2 - p1 - upper
-    d_lower = p2 - p1 - lower
-    # print (d_lower, d_upper)
+    # upper = z_interval * divid
+    # lower = z_interval * -1 *divid
+    # d_upper = p2 - p1 - upper
+    # d_lower = p2 - p1 - lower
+    # # print (d_lower, d_upper)
 
-    a = (1.1 - 0)**2 * .05
-    b = (1.1 - 1)**2 * .8 
-    c = (1.1 - 2)**2 * .15
-    print (a + b + c)
+    # a = (1.1 - 0)**2 * .05
+    # b = (1.1 - 1)**2 * .8 
+    # c = (1.1 - 2)**2 * .15
+    # print (a + b + c)
+
+    n = 7689
+    sum_xi = 6151
+    trial_exp_inter(n, sum_xi)
+    # https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Intervals_for_the_Exponential_Lifetime_Mean.pdf
+
+    # https://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/CI.pdf
     
 
 """    
