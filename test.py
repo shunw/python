@@ -2,6 +2,8 @@ import csv
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import numpy as np
+
+from doepy import build, read_write
     
 # sample_1 = np.array([16.869, 25.050, 22.429, 8.456, 20.589, 12.207])
 # compare_2 = np.array([11.074, 9.686, 12.064, 9.351, 8.182, 6.642])
@@ -61,7 +63,11 @@ def trial_exp_inter(n, sum_xi, alpha = .05):
     print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
     print ( (2 * sum_xi) / chi_sqrt_low, (2 * sum_xi) / chi_sqrt_high)
 
-    
+def trial_doe(): 
+    read_write.write_csv(
+    build.frac_fact_res(read_write.read_variables_csv('ranges.csv')),
+    filename='DOE_table.csv'
+    )    
 
 if __name__ == '__main__':
     # print (wilson(0,10))
@@ -100,12 +106,16 @@ if __name__ == '__main__':
     # c = (1.1 - 2)**2 * .15
     # print (a + b + c)
 
-    n = 7689
-    sum_xi = 6151
-    trial_exp_inter(n, sum_xi)
+    # n = 7689
+    # sum_xi = 6151
+    # trial_exp_inter(n, sum_xi)
     # https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Intervals_for_the_Exponential_Lifetime_Mean.pdf
 
     # https://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/CI.pdf
+
+    
+    trial_doe()
+    
     
 
 """    
