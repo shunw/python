@@ -2,6 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import numpy as np
+import pandas as pd
 
 from doepy import build, read_write
     
@@ -63,9 +64,16 @@ def trial_exp_inter(n, sum_xi, alpha = .05):
     print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
     print ( (2 * sum_xi) / chi_sqrt_low, (2 * sum_xi) / chi_sqrt_high)
 
+# def _move_nan_in_list(data_list):
+    
 def trial_doe(): 
+    df = pd.read_csv('ranges.csv')
+    dict_ready = df.to_dict('list')
+    for k, v in dict_ready.items():
+        dict_ready[k] = [x for x in v if str(x) != 'nan'].copy()
+    # print (dict_ready)
     read_write.write_csv(
-    build.frac_fact_res(read_write.read_variables_csv('ranges.csv')),
+    build.frac_fact_res(dict_ready),
     filename='DOE_table.csv'
     )    
 
@@ -115,6 +123,13 @@ if __name__ == '__main__':
 
     
     trial_doe()
+    # a = build.frac_fact_res(
+    # {'Pressure':[40,55,70],
+    # 'Temperature':[290, 320, 350],
+    # 'Flow rate':[0.2,0.4],
+    # 'Time':[5,8]}
+    # )
+    # print (a)
     
     
 
