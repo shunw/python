@@ -2,6 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import numpy as np
+import re
     
 # sample_1 = np.array([16.869, 25.050, 22.429, 8.456, 20.589, 12.207])
 # compare_2 = np.array([11.074, 9.686, 12.064, 9.351, 8.182, 6.642])
@@ -61,7 +62,21 @@ def trial_exp_inter(n, sum_xi, alpha = .05):
     print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
     print ( (2 * sum_xi) / chi_sqrt_low, (2 * sum_xi) / chi_sqrt_high)
 
+
+def get_same_part(p_word, l_word): 
+    length = len(p_word)
     
+    for i in range(1, length): 
+        
+        part = p_word[length - i: ]
+        # print (part)
+        if part in l_word: 
+            # print (part)
+            # print (l_word[ : len(part)])
+            if part == l_word[ : len(part)]: 
+                return p_word + l_word[len(part): ]
+    return p_word + l_word
+
 
 if __name__ == '__main__':
     # print (wilson(0,10))
@@ -100,13 +115,28 @@ if __name__ == '__main__':
     # c = (1.1 - 2)**2 * .15
     # print (a + b + c)
 
-    n = 7689
-    sum_xi = 6151
-    trial_exp_inter(n, sum_xi)
+    # n = 7689
+    # sum_xi = 6151
+    # trial_exp_inter(n, sum_xi)
     # https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Intervals_for_the_Exponential_Lifetime_Mean.pdf
 
     # https://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/CI.pdf
+
     
+
+    
+    word_n = input()
+
+    for i in range(int(word_n)):
+        c_word = input()
+        
+        if i == 0: 
+            res = c_word
+            
+        else: 
+            
+            res = get_same_part(res, c_word)
+    print(res)
 
 """    
 --------------------
