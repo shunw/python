@@ -2,7 +2,13 @@ import csv
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import numpy as np
+<<<<<<< HEAD
 import re
+=======
+import pandas as pd
+
+from doepy import build, read_write
+>>>>>>> aeca8e6a34aeaf88a6bb6cd1befa4090f2a06869
     
 # sample_1 = np.array([16.869, 25.050, 22.429, 8.456, 20.589, 12.207])
 # compare_2 = np.array([11.074, 9.686, 12.064, 9.351, 8.182, 6.642])
@@ -62,6 +68,7 @@ def trial_exp_inter(n, sum_xi, alpha = .05):
     print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
     print ( (2 * sum_xi) / chi_sqrt_low, (2 * sum_xi) / chi_sqrt_high)
 
+<<<<<<< HEAD
 
 def get_same_part(p_word, l_word): 
     length = len(p_word)
@@ -77,6 +84,20 @@ def get_same_part(p_word, l_word):
                 return p_word + l_word[len(part): ]
     return p_word + l_word
 
+=======
+# def _move_nan_in_list(data_list):
+    
+def trial_doe(): 
+    df = pd.read_csv('ranges.csv')
+    dict_ready = df.to_dict('list')
+    for k, v in dict_ready.items():
+        dict_ready[k] = [x for x in v if str(x) != 'nan'].copy()
+    # print (dict_ready)
+    read_write.write_csv(
+    build.frac_fact_res(dict_ready),
+    filename='DOE_table.csv'
+    )    
+>>>>>>> aeca8e6a34aeaf88a6bb6cd1befa4090f2a06869
 
 if __name__ == '__main__':
     # print (wilson(0,10))
@@ -122,6 +143,16 @@ if __name__ == '__main__':
 
     # https://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/CI.pdf
 
+    
+    trial_doe()
+    # a = build.frac_fact_res(
+    # {'Pressure':[40,55,70],
+    # 'Temperature':[290, 320, 350],
+    # 'Flow rate':[0.2,0.4],
+    # 'Time':[5,8]}
+    # )
+    # print (a)
+    
     
 
     
