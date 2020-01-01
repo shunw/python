@@ -55,11 +55,11 @@ class bld_map(object):
         if p == L: 
             self.right_bottom = tuple((self.right_bottom[0], self.right_bottom[1] - (max_w + 1)))
         elif p == R: 
-            self.left_top = tuple((self.left_top[0], self.left_top[1] - (max_w + 1)))
+            self.left_top = tuple((self.left_top[0], self.left_top[1] + (max_w + 1)))
         elif p == U: 
             self.right_bottom = tuple((self.right_bottom[0] - (max_h + 1), self.right_bottom[1]))
         elif p == D: 
-            self.right_bottom = tuple((self.left_top[0] - (max_h + 1), self.left_top[1]))
+            self.left_top = tuple((self.left_top[0] + (max_h + 1), self.left_top[1]))
 
     def bld_load(self, p, bld_case_dict, area_des_list): 
         # bld_case is the building class case, p is the dor_direction
@@ -67,10 +67,12 @@ class bld_map(object):
         # strategy will be applied here
         
         self._boundary_check()
-        h_cur = self.br_r_cur - self.tl_r_cur + 1
-        w_cur = self.br_c_cur - self.tl_c_cur + 1
+        h_cur = self.br_r_cur - self.tl_r_cur
+        w_cur = self.br_c_cur - self.tl_c_cur
 
-        print (self.left_top, self.right_bottom)
+        pro_h, pro_w = 0, 0 # this is to define the left/ right position
+
+        # print (p, self.left_top, self.right_bottom)
         
         max_h, max_w = 0, 0
         for a in area_des_list: # the list listed all the key
@@ -83,39 +85,47 @@ class bld_map(object):
             if p == U: 
                 
                 bld_left_top_r = self.br_r_cur - bld_case.h
-                bld_left_top_c = self.tl_c_cur
+                bld_left_top_c = self.tl_c_cur + pro_w
                 bld_right_bot_r = self.br_r_cur
-                bld_right_bot_c = self.tl_c_cur + bld_case.w
+                bld_right_bot_c = self.tl_c_cur + pro_w + bld_case.w
                 
+                pro_w += bld_case.w
                 w_cur -= bld_case.w
 
                 if bld_case.h > max_h: 
                     max_h = bld_case.h
             
-            elif p == D or p == R:
-                bld_left_top_r = self.tl_r_cur
-                bld_left_top_c = self.tl_c_cur
+            elif p == D: 
+                bld_left_top_r = self.tl_r_cur 
+                bld_left_top_c = self.tl_c_cur + pro_w
                 bld_right_bot_r = self.tl_r_cur + bld_case.h
+                bld_right_bot_c = self.tl_c_cur + pro_w + bld_case.w
+
+                pro_w += bld_case.w
+                w_cur -= bld_case.w
+
+                if bld_case.h > max_h: 
+                    max_h = bld_case.h
+
+            elif p == R:
+                bld_left_top_r = self.tl_r_cur + pro_h
+                bld_left_top_c = self.tl_c_cur
+                bld_right_bot_r = self.tl_r_cur + pro_h + bld_case.h
                 bld_right_bot_c = self.tl_c_cur + bld_case.w
-                
-                if p == D: 
-                    w_cur -= bld_case.w
 
-                    if bld_case.h > max_h: 
-                        max_h = bld_case.h
+                pro_h += bld_case.h
+                h_cur -= bld_case.h
 
-                elif p == R: 
-                    h_cur -= bld_case.h
-
-                    if bld_case.w > max_w: 
-                        max_w = bld_case.w
+                if bld_case.w > max_w: 
+                    max_w = bld_case.w
 
             elif p == L:
-                bld_left_top_r = self.tl_r_cur
+                bld_left_top_r = self.tl_r_cur + pro_h
                 bld_left_top_c = self.br_c_cur - bld_case.w
-                bld_right_bot_r = self.tl_r_cur + bld_case.h
+                bld_right_bot_r = self.tl_r_cur + pro_h + bld_case.h
                 bld_right_bot_c = self.br_c_cur
                 
+                pro_h += bld_case.h
                 h_cur -= bld_case.h
 
                 if bld_case.w > max_w: 
@@ -124,6 +134,8 @@ class bld_map(object):
             self._map_update(bld_left_top_r, bld_left_top_c, bld_right_bot_r, bld_right_bot_c, bld_case.ind)
         
         self._update_4_corner(p, max_h, max_w)
+        # print (p, self.left_top, self.right_bottom)
+
     def to_str_dis(self): 
         str_stream = self.map.flatten()
         res_total = str_stream[:self.w_total]
@@ -161,9 +173,9 @@ class bld_case(object):
 
 
 if __name__ == '__main__': 
-    input_1_1 = '5 5 2'
-    input_1_2 = ['2 5 2 2', '2 5 1 3']
-    # input_1_2 = ['2 5 2 2', '2 3 2 2', '2 5 1 3']
+    input_1_1 = '5 7 4'
+    input_1_2 = ['3 5 1 3', '3 5 3 3', '3 5 2 1', '3 5 2 5']
+    
     
     input_ls = input_1_1.split(' ')
     h_total, w_total, qty = int(input_ls[0]), int(input_ls[1]), int(input_ls[2])
@@ -173,14 +185,16 @@ if __name__ == '__main__':
     L, R, U, D = 'left', 'right', 'up', 'down'
     bld_dict = {L: dict(), R: dict(), U: dict(), D:dict()} #{'left': {area1: bld_case, area2: bld_case}, 'right': {area1: bld_case, ...}}
     for i in range(qty): 
+        # print (i)
         input_line = input_1_2[i].split(' ')
         temp_case = bld_case(i+1, int(input_line[0]), int(input_line[1]), int(input_line[2]), int(input_line[3]))
         bld_dict[temp_case.dor_face()][temp_case.area()] = temp_case
     
     pos_order = [D, U, L, R]
     for p in pos_order: 
+        if len(bld_dict[p]) == 0: continue
         area_des_list = sorted(list(bld_dict[p].keys()), reverse = True)
-                
+
         # 在这里标注门的位置， 将map的可以放置的位置去掉
         map_status.bld_load(p, bld_dict[p], area_des_list) # 将一个方向上的，一次性全部load到map里去
     map_status.to_str_dis()
