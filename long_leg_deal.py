@@ -424,13 +424,20 @@ if __name__ == '__main__':
     # long_leg.final_run()
     
     # sup_qty = 120
-    sup_name_fl = 'support.txt'
-    sup_name_list = get_name_ls(sup_name_fl)
-    for i in sup_name_list: 
-        print (i.encode('utf-8-sig'))
+    # sup_name_fl = 'support.txt'
+    # sup_name_list = get_name_ls(sup_name_fl)
+    # for i in sup_name_list: 
+    #     print (i.encode('utf-8-sig'))
     # create_support_list(sup_qty, sup_name_list)
+    '''
+    test_re
+    '''
+    fl = pd.read_csv('_till_1215.csv', encoding = 'utf-8-sig')
+    # re_ch = re.compile(u'[⺀-⺙⺛-⻳⼀-⿕々〇〡-〩〸-〺〻㐀-䶵一-鿃豈-鶴侮-頻並-龎]', re.UNICODE)
     
-
+    fl['cldage_new'] = fl['ChildrenAge'].apply(lambda x: re.sub('[六]', '6', x))
+    print (fl['cldage_new'].unique())
+    #===============================================
 
     '''
     ******************************************************************
