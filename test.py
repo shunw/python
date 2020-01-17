@@ -2,13 +2,13 @@ import csv
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import numpy as np
-<<<<<<< HEAD
+# <<<<<<< HEAD
 import re
-=======
+# =======
 import pandas as pd
 
 from doepy import build, read_write
->>>>>>> aeca8e6a34aeaf88a6bb6cd1befa4090f2a06869
+# >>>>>>> aeca8e6a34aeaf88a6bb6cd1befa4090f2a06869
     
 # sample_1 = np.array([16.869, 25.050, 22.429, 8.456, 20.589, 12.207])
 # compare_2 = np.array([11.074, 9.686, 12.064, 9.351, 8.182, 6.642])
@@ -62,13 +62,14 @@ def wilson(clicks, impressions):
 
 
 def trial_exp_inter(n, sum_xi, alpha = .05): 
+    # jam rate calculation
     # to check how to get the exponential interval
     chi_sqrt_low = st.chi2.ppf(q = alpha/2, df = 2 * n )
     chi_sqrt_high = st.chi2.ppf(q = 1 - alpha/2, df = 2 * n )
-    print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
-    print ( (2 * sum_xi) / chi_sqrt_low, (2 * sum_xi) / chi_sqrt_high)
+    # print (chi_sqrt_low / (2 * sum_xi), chi_sqrt_high / (2 * sum_xi))
+    print ('for the confidence level of {conf}, the lower boundary is {lower: .3f}, the upper boundary is {upper: .3f}'.format(conf = 1-alpha, lower = (2 * sum_xi) / chi_sqrt_high, upper = (2 * sum_xi) / chi_sqrt_low))
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
 
 def get_same_part(p_word, l_word): 
     length = len(p_word)
@@ -84,7 +85,7 @@ def get_same_part(p_word, l_word):
                 return p_word + l_word[len(part): ]
     return p_word + l_word
 
-=======
+# =======
 # def _move_nan_in_list(data_list):
     
 def trial_doe(): 
@@ -97,7 +98,7 @@ def trial_doe():
     build.frac_fact_res(dict_ready),
     filename='DOE_table.csv'
     )    
->>>>>>> aeca8e6a34aeaf88a6bb6cd1befa4090f2a06869
+# >>>>>>> aeca8e6a34aeaf88a6bb6cd1befa4090f2a06869
 
 if __name__ == '__main__':
     # print (wilson(0,10))
@@ -144,7 +145,7 @@ if __name__ == '__main__':
     # https://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/CI.pdf
 
     
-    trial_doe()
+    # trial_doe()
     # a = build.frac_fact_res(
     # {'Pressure':[40,55,70],
     # 'Temperature':[290, 320, 350],
@@ -156,18 +157,22 @@ if __name__ == '__main__':
     
 
     
-    word_n = input()
+    # word_n = input()
 
-    for i in range(int(word_n)):
-        c_word = input()
+    # for i in range(int(word_n)):
+    #     c_word = input()
         
-        if i == 0: 
-            res = c_word
+    #     if i == 0: 
+    #         res = c_word
             
-        else: 
+    #     else: 
             
-            res = get_same_part(res, c_word)
-    print(res)
+    #         res = get_same_part(res, c_word)
+    # print(res)
+
+    jam_occur = 6
+    image = 1804
+    trial_exp_inter(jam_occur, image, 0.25)
 
 """    
 --------------------
