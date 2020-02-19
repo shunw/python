@@ -215,6 +215,8 @@ def equalize(im):
     return im.point(lut*im.layers)
     # return im.point(lut*4)
 
+
+
 if __name__ == '__main__':
     # f_name = 'mhz.png'
     # f_name3 = 'vivian.jpg'
@@ -250,18 +252,20 @@ if __name__ == '__main__':
     # cv2.imshow('res', res)
     # cv2.waitKey(0)
 
-    '''
-    this is to make the image sharpened
-    '''
-    sharpen_image = photo_deal(f_name3)
-    kernel_normal_sharpen = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-    kernel_edge_enhanced = np.array([[-1,-1,-1,-1,-1],
-                               [-1,2,2,2,-1],
-                               [-1,2,8,2,-1],
-                               [-2,2,2,2,-1],
-                               [-1,-1,-1,-1,-1]])/8.0
-    kernel_excessive = np.array([[1,1,1], [1,-7,1], [1,1,1]])
-    sharpen_image.normal_sharpen(kernel_edge_enhanced)
+    # '''
+    # this is to make the image sharpened
+    # '''
+    # sharpen_image = photo_deal(f_name3)
+    # kernel_normal_sharpen = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+    # kernel_edge_enhanced = np.array([[-1,-1,-1,-1,-1],
+    #                            [-1,2,2,2,-1],
+    #                            [-1,2,8,2,-1],
+    #                            [-2,2,2,2,-1],
+    #                            [-1,-1,-1,-1,-1]])/8.0
+    # kernel_excessive = np.array([[1,1,1], [1,-7,1], [1,1,1]])
+    # sharpen_image.normal_sharpen(kernel_edge_enhanced)
 
+
+    
         
     
