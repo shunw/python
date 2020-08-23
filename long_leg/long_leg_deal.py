@@ -4,6 +4,11 @@ import re
 import os
 import glob
 
+'''
+purpose is to make the total score temperately. 
+current this format is no need
+'''
+
 class basic_deal(object): 
     def __init__(self, apply_doc_folder, peop_info_doc, previous_2_score = None):
         self.apply_doc_folder = apply_doc_folder
