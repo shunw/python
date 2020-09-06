@@ -40,7 +40,7 @@ def message_display(text):
     largeText = pygame.font.Font('freesansbold.ttf', 115)
     TextSurf, TextRect = text_objects(text, largeText)
     TextRect.center = ((display_width/2), (display_height/2))
-    gameDisplay.blit(TextSurf, TextRect)
+    screen.blit(TextSurf, TextRect)
 
     pygame.display.update()
 
@@ -123,6 +123,7 @@ def game_loop():
             if x > thing_startx and x < thing_startx + thing_width or x+car_width > thing_startx and x + car_width < thing_startx+thing_width:
                 print ('x crossover')
                 crash() 
+                
 
         if thing_starty > display_height:
             thing_starty = 0 - thing_height
