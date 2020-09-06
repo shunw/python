@@ -10,6 +10,8 @@ display_height = 600
 black = (0, 0, 0)
 white = (255, 255, 255)
 red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
 
 block_color = (53, 115, 255)
 
@@ -40,7 +42,7 @@ def message_display(text):
     largeText = pygame.font.Font('freesansbold.ttf', 115)
     TextSurf, TextRect = text_objects(text, largeText)
     TextRect.center = ((display_width/2), (display_height/2))
-    screen.blit(TextSurf, TextRect)
+    gameDisplay.blit(TextSurf, TextRect)
 
     pygame.display.update()
 
@@ -50,6 +52,22 @@ def message_display(text):
 def crash():
     message_display('You Crashed')
     
+def game_intro():
+    intro = True
+    while intro: 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: 
+                pygame.quit()
+                quit()
+        
+        gameDisplay.fill(white)
+        largeText = pygame.font.Font('freesansbold.ttf', 115)
+        TextSurf, TextRect = text_objects('A bit Racey', largeText)
+        TextRect.center = ((display_width/2), (display_height/2))
+        gameDisplay.blit(TextSurf, TextRect)
+        pygame.display.update()
+        clock.tick(15)
+
 def game_loop():
 
     x = (display_width * .45)
@@ -132,7 +150,7 @@ def game_loop():
         pygame.display.update()
         clock.tick(60)
 
-
+game_intro()
 game_loop()
 pygame.quit()
 quit()
