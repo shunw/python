@@ -3,6 +3,7 @@ import pygame
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
+green = (0, 255, 0)
 
 display_width = 800
 display_height = 600
@@ -26,11 +27,19 @@ def game_intro():
                 quit()
         
         gameDisplay.fill(white)
-        pygame.draw.rect(gameDisplay, red, (400, 400, 50, 25))
+        
+        # added
+        pygame.draw.rect(gameDisplay, red, (display_width/2 - 5.5*60, display_height/2 - 60, 60*11, 2*60))
+        
         largeText = pygame.font.Font('freesansbold.ttf', 115)
         TextSurf, TextRect = text_objects('A bit Racey', largeText)
-        TextRect.center = ((display_width/2), (display_height/2))
+        TextRect.center = (display_width/2, display_height/2)
+        
         gameDisplay.blit(TextSurf, TextRect)
+        
+        # added
+        b = pygame.display.blit()
+
         pygame.display.update()
         clock.tick(15)
 
