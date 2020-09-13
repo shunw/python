@@ -2,10 +2,21 @@ import pygame
 import time
 import random
 
+
 pygame.init()
 
 display_width = 800
 display_height = 600
+
+#======= added
+button_lt_x = display_width/2 - 5.5*60
+button_lt_y = display_height/2 - 60
+button_width = 60*11
+button_height = 2*60
+button_rb_x = button_lt_x + button_width
+button_rb_y = button_lt_y + button_height
+
+#======= added end
 
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -47,110 +58,182 @@ def message_display(text):
     pygame.display.update()
 
     time.sleep(2)
-    game_loop()
+    # game_loop()
 
 def crash():
     message_display('You Crashed')
-    
-def game_intro():
-    intro = True
-    while intro: 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: 
-                pygame.quit()
-                quit()
+
+def intro_button():
+    # 59 - 735/ 219 - 348 
+    pygame.draw.rect(gameDisplay, green, (400, 400, 50, 25))
+
+
+import enum
+class GameState(enum.Enum):
+    Intro = 0
+    Start = 1
+    Running = 2
+    Crash = 3
+
+class racycar(): 
+    def __init__(self): 
+        self.state = GameState.Intro
+        self.x = (display_width * .45)
+        self.y = (display_height * .8)
         
+        self.x_change = 0
+        self.y_change = 0
+
+        self.thing_startx = random.randrange(0, display_width)
+        self.thing_starty = -600
+        self.thing_speed = 7
+        self.thing_width = 100
+        self.thing_height = 100
+
+        self.thingCount = 1
+        self.dodged = 0
+        self.score = 0
+        
+        self.gameExit = False
+    def reset(self): 
+        self.state = GameState.Intro
+        self.x = (display_width * .45)
+        self.y = (display_height * .8)
+        
+        self.x_change = 0
+        self.y_change = 0
+
+        self.thing_startx = random.randrange(0, display_width)
+        self.thing_starty = -600
+        self.thing_speed = 7
+        self.thing_width = 100
+        self.thing_height = 100
+
+        self.thingCount = 1
+        self.dodged = 0
+        
+        self.gameExit = False
+
+    def intro(self): 
+        '''
+        purpose is to show the start button and after people click the button the game state will change to game running (into the game loop)
+        '''
         gameDisplay.fill(white)
+
+        #======= added
+        pygame.draw.rect(gameDisplay, green, (button_lt_x, button_lt_y, button_width, button_height))
+        #======= added end
+
         largeText = pygame.font.Font('freesansbold.ttf', 115)
         TextSurf, TextRect = text_objects('A bit Racey', largeText)
         TextRect.center = ((display_width/2), (display_height/2))
         gameDisplay.blit(TextSurf, TextRect)
-        pygame.display.update()
-        clock.tick(15)
-
-def game_loop():
-
-    x = (display_width * .45)
-    y = (display_height * .8)
-    
-    x_change = 0
-    y_change = 0
-
-    thing_startx = random.randrange(0, display_width)
-    thing_starty = -600
-    thing_speed = 7
-    thing_width = 100
-    thing_height = 100
-
-    thingCount = 1
-    dodged = 0
-    
-    gameExit = False
-    
-    while not gameExit: 
-
+        
         for event in pygame.event.get():
+            # print (event)
+            if event.type == pygame.QUIT: 
+                pygame.quit()
+                quit()
+
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                
+                px, py = event.pos
+                if (px in range(int(button_lt_x),int(button_rb_x))) and (py in range(int(button_lt_y),int(button_rb_y))):
+            
+                    self.state = GameState.Running
+                    # print ('started')
+                    return 
+
+    def game_run(self):
+        '''
+        purpose: 
+            game loop --- control the race car move, left and right; 
+            when it hits something, it will show crashed and then change the game state to intro.
+            and reset all the paramter to the initial status
+        '''
+        for event in pygame.event.get():
+            
             if event.type == pygame. QUIT:
                 pygame.quit()
                 quit()
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    x_change = -5
+                    self.x_change = -5
                 if event.key == pygame.K_RIGHT:
-                    x_change = 5
+                    self.x_change = 5
                 if event.key == pygame.K_UP:
-                    y_change = -5
+                    self.y_change = -5
                 if event.key == pygame.K_DOWN:
-                    y_change = 5
+                    self.y_change = 5
                     
             
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    x_change = 0
+                    self.x_change = 0
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    y_change = 0
-        x += x_change
-        y += y_change
+                    self.y_change = 0
+            
+        self.x += self.x_change
+        self.y += self.y_change
         
 
         gameDisplay.fill(white)
 
         # things(thingx, thingy, thingw, thingh, color)
-        things(thing_startx, thing_starty, thing_width, thing_height, black)
-        thing_starty += thing_speed
+        things(self.thing_startx, self.thing_starty, self.thing_width, self.thing_height, black)
+        self.thing_starty += self.thing_speed
 
-        car(x, y)
-        things_dodged(dodged)
+        car(self.x, self.y)
+        things_dodged(self.dodged)
 
-        if x > display_width - car_width or x < 0: 
+        if self.x > display_width - car_width or self.x < 0: 
+            self.state = GameState.Intro
+            # print ('im crashed1')
             crash()
+            self.reset()
+            
         
         # when the obj is passed through the window, need to restart the obj
-        if thing_starty > display_height: 
-            thing_starty = 0 - thing_height
-            thing_startx = random.randrange(0, display_width)
-            dodged += 1
-            thing_speed += 1
-            thing_width += (dodged * 1.2)
+        if self.thing_starty > display_height: 
+            self.thing_starty = 0 - self.thing_height
+            self.thing_startx = random.randrange(0, display_width)
+            self.dodged += 1
+            self.thing_speed += 1
+            self.thing_width += (self.dodged * 1.2)
         
-        if y < thing_starty + thing_height:
-            print ('y crossover')
-            # score += 1
+        if self.y < self.thing_starty + self.thing_height:
+            # print ('y crossover')
+            self.score += 1
         
-            if x > thing_startx and x < thing_startx + thing_width or x+car_width > thing_startx and x + car_width < thing_startx+thing_width:
-                print ('x crossover')
-                crash() 
-                
+            if self.x > self.thing_startx and self.x < self.thing_startx + self.thing_width or self.x+car_width > self.thing_startx and self.x + car_width < self.thing_startx + self.thing_width:
+                # print ('x crossover')
+                self.state = GameState.Intro
+                # print ('im crashed2', self.state)
+                crash()
+                self.reset()
+                        
 
-        if thing_starty > display_height:
-            thing_starty = 0 - thing_height
-            thing_startx = random.randrange(0, display_width)
+    def game_loop(self): 
+        '''
+        purpose: 
+            is to link the intro and the game loop by check the game status
+            if status is intro, it will show the button
+            if status is running, it will run the game till crash. 
+        '''
+        while True:
+            print (self.state)
+            if self.state == GameState.Intro:
+                self.intro()
+            elif self.state == GameState.Running:
+                self.game_run()
+            pygame.display.update()
+            clock.tick(15)
+        
 
-        pygame.display.update()
-        clock.tick(60)
+race = racycar()    
+race.game_loop()
 
-game_intro()
-game_loop()
 pygame.quit()
 quit()
