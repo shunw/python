@@ -20,8 +20,10 @@ button_rb_y = button_lt_y + button_height
 
 black = (0, 0, 0)
 white = (255, 255, 255)
-red = (255, 0, 0)
-green = (0, 255, 0)
+red = (200, 0, 0)
+bright_red = (255, 0, 0)
+green = (0, 200, 0)
+bright_green = (0, 255, 0)
 blue = (0, 0, 255)
 
 block_color = (53, 115, 255)
@@ -63,17 +65,38 @@ def message_display(text):
 def crash():
     message_display('You Crashed')
 
-def intro_button():
-    # 59 - 735/ 219 - 348 
-    pygame.draw.rect(gameDisplay, green, (400, 400, 50, 25))
+def button(msg, mx, my, w, h, ic, ac, action = None): 
+    '''
+    statechange: flag to change the state or not
+    '''
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    # print (click)
+
+    if mx + w > mouse[0] > mx and my + h > mouse[1] > my: 
+        pygame.draw.rect(gameDisplay, ac, (mx, my, w, h))
+
+        if click[0] == 1 and action != None: 
+            action()
+            
+    else: 
+        pygame.draw.rect(gameDisplay, ic, (mx, my, w, h))
+    
+    smallText = pygame.font.Font('freesansbold.ttf', 20)
+    # smallText = pygame.font.SysFont('comicsansms', 20)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ((mx + (w/2)), (my + (h/2)))
+    gameDisplay.blit(textSurf, textRect)
 
 
 import enum
 class GameState(enum.Enum):
+    Quit = -1
     Intro = 0
     Start = 1
     Running = 2
     Crash = 3
+    
 
 class racycar(): 
     def __init__(self): 
@@ -95,6 +118,7 @@ class racycar():
         self.score = 0
         
         self.gameExit = False
+
     def reset(self): 
         self.state = GameState.Intro
         self.x = (display_width * .45)
@@ -120,15 +144,33 @@ class racycar():
         '''
         gameDisplay.fill(white)
 
-        #======= added
-        pygame.draw.rect(gameDisplay, green, (button_lt_x, button_lt_y, button_width, button_height))
-        #======= added end
-
+        
         largeText = pygame.font.Font('freesansbold.ttf', 115)
+        # largeText = pygame.font.SysFont('comicsansms', 115)
         TextSurf, TextRect = text_objects('A bit Racey', largeText)
         TextRect.center = ((display_width/2), (display_height/2))
         gameDisplay.blit(TextSurf, TextRect)
+
+        # pygame.draw.rect(gameDisplay, green, (button_lt_x, button_lt_y, button_width, button_height))
+        mouse = pygame.mouse.get_pos()
+        # pygame.draw.rect(gameDisplay, green, (150, 450, 100, 50))
+        # pygame.draw.rect(gameDisplay, red, (550, 450, 100, 50))
         
+        # if 150 + 100 > mouse[0] > 150 and 450 + 50 > mouse[1] > 450:
+        #     pygame.draw.rect(gameDisplay, bright_green, (150, 450, 100, 50))
+        # else: 
+        #     pygame.draw.rect(gameDisplay, green, (150, 450, 100, 50))
+        
+        # smallText = pygame.font.Font('freesansbold.ttf', 20)
+        # textSurf, textRect = text_objects('GO!', smallText)
+        # textRect.center = ((150 + (100/2)), (450 + (50/2)))
+        # gameDisplay.blit(textSurf, textRect)
+
+        # pygame.draw.rect(gameDisplay, red, (550, 450, 100, 50))
+
+        button('GO!', 150, 450, 100, 50, green, bright_green, self.game_run)
+        button('Quit!', 550, 450, 100, 50, red, bright_red)
+
         for event in pygame.event.get():
             # print (event)
             if event.type == pygame.QUIT: 
@@ -152,6 +194,7 @@ class racycar():
             when it hits something, it will show crashed and then change the game state to intro.
             and reset all the paramter to the initial status
         '''
+        self.state = GameState.Running
         for event in pygame.event.get():
             
             if event.type == pygame. QUIT:
@@ -223,7 +266,7 @@ class racycar():
             if status is running, it will run the game till crash. 
         '''
         while True:
-            print (self.state)
+            # print (self.state)
             if self.state == GameState.Intro:
                 self.intro()
             elif self.state == GameState.Running:
