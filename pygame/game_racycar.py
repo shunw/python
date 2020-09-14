@@ -96,6 +96,7 @@ class GameState(enum.Enum):
     Start = 1
     Running = 2
     Crash = 3
+    Pause = 4
     
 
 class racycar(): 
@@ -151,25 +152,10 @@ class racycar():
         TextRect.center = ((display_width/2), (display_height/2))
         gameDisplay.blit(TextSurf, TextRect)
 
-        # pygame.draw.rect(gameDisplay, green, (button_lt_x, button_lt_y, button_width, button_height))
         mouse = pygame.mouse.get_pos()
-        # pygame.draw.rect(gameDisplay, green, (150, 450, 100, 50))
-        # pygame.draw.rect(gameDisplay, red, (550, 450, 100, 50))
         
-        # if 150 + 100 > mouse[0] > 150 and 450 + 50 > mouse[1] > 450:
-        #     pygame.draw.rect(gameDisplay, bright_green, (150, 450, 100, 50))
-        # else: 
-        #     pygame.draw.rect(gameDisplay, green, (150, 450, 100, 50))
-        
-        # smallText = pygame.font.Font('freesansbold.ttf', 20)
-        # textSurf, textRect = text_objects('GO!', smallText)
-        # textRect.center = ((150 + (100/2)), (450 + (50/2)))
-        # gameDisplay.blit(textSurf, textRect)
-
-        # pygame.draw.rect(gameDisplay, red, (550, 450, 100, 50))
-
         button('GO!', 150, 450, 100, 50, green, bright_green, self.game_run)
-        button('Quit!', 550, 450, 100, 50, red, bright_red)
+        button('Quit!', 550, 450, 100, 50, red, bright_red, self.game_quit)
 
         for event in pygame.event.get():
             # print (event)
@@ -186,6 +172,13 @@ class racycar():
                     self.state = GameState.Running
                     # print ('started')
                     return 
+    def game_quit(self): 
+        '''
+        this is the quit option during the start page
+        '''
+        self.state = GameState.Quit
+        pygame.quit()
+        quit()
 
     def game_run(self):
         '''
@@ -197,7 +190,7 @@ class racycar():
         self.state = GameState.Running
         for event in pygame.event.get():
             
-            if event.type == pygame. QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
             
@@ -257,6 +250,23 @@ class racycar():
                 crash()
                 self.reset()
                         
+    def game_pause(self): 
+        '''
+        when there is some request for pausing
+        '''
+        self.state = GameState.Pause
+        car(self.x, self.y)
+        things_dodged(self.dodged)
+
+        for event in pygame.event.get():
+            
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.state = GameState.Running
 
     def game_loop(self): 
         '''
@@ -271,6 +281,16 @@ class racycar():
                 self.intro()
             elif self.state == GameState.Running:
                 self.game_run()
+                
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            self.state = GameState.Running
+
+            elif self.state == GameState.Quit:
+                self.game_quit()
+            elif self.state == GameState.Pause:
+                self.game_pause()
             pygame.display.update()
             clock.tick(15)
         
