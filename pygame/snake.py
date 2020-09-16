@@ -7,8 +7,15 @@ import enum
 
 black = (0, 0, 0)
 white = (255, 255, 255)
-green = (0, 255, 0)
+bright_green = (0, 255, 0)
 green = (0, 200, 0)
+
+display_width = 800
+display_height = 600
+
+snake_one_block = 10 # this means after the snake eat one bean, it will have increment 5*5 pixel at its bottom
+snake_inital_len = 5*snake_one_block
+pixel_width = 1
 
 class GameState(enum.Enum):
     Intro = 0
@@ -25,7 +32,8 @@ def pygame_quit():
 
 class Game_Snake():
     def __init__(self):
-        pass
+        self.start_x = 0
+        self.start_y = 0
 
     def _snake_shape(self): 
         pass
@@ -34,7 +42,7 @@ class Game_Snake():
         this is loop all the process for the game snake
         '''
         pygame.init()
-        gameDisplay = pygame.display.set_mode((800, 600))
+        gameDisplay = pygame.display.set_mode((display_width, display_height))
         gameDisplay.fill(black)
 
         while True:
@@ -42,8 +50,14 @@ class Game_Snake():
             pygame_quit()
 
             pixAr = pygame.PixelArray(gameDisplay)
-            pixAr[10:20, 10:20] = green
-            # pixAr[11][20] = green
+            
+            # head
+            pixAr[self.start_x:self.start_x + pixel_width, self.start_y + snake_inital_len - snake_one_block : self.start_y + snake_inital_len] = green
+            pixAr[self.start_x + snake_one_block - pixel_width :self.start_x + snake_one_block, self.start_y + snake_inital_len - snake_one_block : self.start_y + snake_inital_len] = green
+            pixAr[self.start_x :self.start_x + snake_one_block,  self.start_y + snake_inital_len - pixel_width: self.start_y + snake_inital_len] = green
+
+            # body
+            pixAr[self.start_x:self.start_x + snake_one_block, self.start_y :self.start_y + snake_inital_len - snake_one_block] = green
 
             pygame.display.update()
 
